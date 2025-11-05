@@ -73,6 +73,38 @@ git clone https://github.com/norbi07011/MESSU-BOUW-PREMIUM-14-main.git
 cd MESSU-BOUW-PREMIUM-14-main
 ```
 
+**⚠️ WAŻNE - Dodatkowy plik spoza Git:**
+
+Plik `Affinity x64.exe` (614 MB) **NIE JEST** w repozytorium GitHub (za duży).
+
+**Musisz go skopiować ze starego komputera:**
+
+```powershell
+# OPCJA 1: Skopiuj z poprzedniego komputera
+# 1. Na STARYM komputerze znajdź plik:
+#    C:\AI PROJEKT\MESSU-BOUW-PREMIUM-13-main\MESSU-BOUW-PREMIUM-13-main\src\i18n\Affinity x64.exe
+# 
+# 2. Skopiuj przez:
+#    - Pendrive
+#    - Dysk sieciowy
+#    - OneDrive/Google Drive
+#    - Kabel USB między komputerami
+#
+# 3. Wklej na NOWYM komputerze do:
+#    C:\AI PROJEKT\MESSU-BOUW-PREMIUM-14-main\src\i18n\Affinity x64.exe
+
+# OPCJA 2: Pobierz z pliku ZIP (jeśli masz backup)
+# Plik jest w ZIP: src\i18n\Affinity x64.exe
+# Wypakuj tylko ten plik i skopiuj do:
+# C:\AI PROJEKT\MESSU-BOUW-PREMIUM-14-main\src\i18n\
+```
+
+**Sprawdź czy plik jest:**
+```powershell
+Test-Path "C:\AI PROJEKT\MESSU-BOUW-PREMIUM-14-main\src\i18n\Affinity x64.exe"
+# Powinno pokazać: True
+```
+
 ### **OPCJA B: Rozpakowanie z ZIP**
 
 Jeśli masz plik ZIP z backupu:
@@ -88,6 +120,8 @@ Expand-Archive -Path "C:\AI PROJEKT\MESSU-BOUW-PREMIUM-14-BACKUP-2025-11-05-2136
 # 3. Wejdź do folderu
 cd "C:\AI PROJEKT\MESSU-BOUW-PREMIUM-14-main"
 ```
+
+**✅ ZALETĄ OPCJI B:** Plik `Affinity x64.exe` jest już w ZIP - nie trzeba go kopiować osobno!
 
 ---
 
@@ -371,6 +405,7 @@ npx cap open ios
 - [ ] Zainstalowano Node.js v22+
 - [ ] Zainstalowano Git
 - [ ] Sklonowano repozytorium lub rozpakowano ZIP
+- [ ] **SKOPIOWANO plik `Affinity x64.exe` do `src/i18n/`** ⚠️ WAŻNE!
 - [ ] Uruchomiono `npm install`
 - [ ] Aplikacja uruchamia się (`npm run dev`)
 - [ ] (Opcjonalnie) Przywrócono dane z poprzedniego komputera
