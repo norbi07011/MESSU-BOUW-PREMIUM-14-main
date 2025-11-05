@@ -1,0 +1,319 @@
+/* WEEKBRIEF TEMPLATE - PEZET STYLE (1:1 Z WZORU) */
+.weekbrief-template {
+  width: 210mm;
+  min-height: 297mm;
+  background: white;
+  padding: 10mm;
+  font-family: Arial, Helvetica, sans-serif;
+  color: black;
+  position: relative;
+  box-sizing: border-box;
+  
+  /* WATERMARK W TLE */
+  background-image: url('/pezet-logo-full.jpg');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 80%;
+  background-blend-mode: multiply;
+  opacity: 1;
+}
+
+.weekbrief-template::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/pezet-logo-full.jpg');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 60%;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.weekbrief-template > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* HEADER Z LOGO */
+.weekbrief-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: 10mm;
+  margin-bottom: 5mm;
+  padding-bottom: 3mm;
+  border-bottom: 1px solid #000;
+}
+
+.weekbrief-logo-section {
+  display: flex;
+  align-items: center;
+  gap: 3mm;
+}
+
+.weekbrief-logo {
+  width: 35mm;
+  height: auto;
+  display: block;
+}
+
+.weekbrief-template-title {
+  font-size: 16pt;
+  font-weight: normal;
+  font-style: italic;
+  color: #999;
+  margin: 0;
+  align-self: center;
+  padding-left: 3mm;
+}
+
+.weekbrief-company-info {
+  text-align: right;
+  font-size: 10pt;
+}
+
+.weekbrief-company-name {
+  font-size: 18pt;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 1mm;
+  line-height: 1.2;
+}
+
+.weekbrief-company-subtitle {
+  font-size: 9pt;
+  color: #000;
+  margin-top: 2mm;
+  font-weight: normal;
+}
+
+.weekbrief-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 1mm;
+  font-size: 9pt;
+  margin-top: 3mm;
+}
+
+.weekbrief-contact-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2mm;
+}
+
+.weekbrief-contact-item span {
+  font-size: 8pt;
+}
+
+.weekbrief-contact-icon {
+  width: 4mm;
+  height: 4mm;
+  color: #c41e3a;
+}
+
+.weekbrief-title-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.weekbrief-template-title {
+  font-size: 16pt;
+  font-weight: normal;
+  font-style: italic;
+  color: #999;
+  margin: 0;
+  padding-left: 3mm;
+}
+.weekbrief-form-fields {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3mm;
+  margin-bottom: 4mm;
+}
+
+.weekbrief-field {
+  display: flex;
+  align-items: center;
+  gap: 2mm;
+  border: 1px solid #000;
+  padding: 2mm 3mm;
+  background: white;
+  min-height: 8mm;
+}
+
+.weekbrief-field-label {
+  font-weight: bold;
+  font-size: 9pt;
+  white-space: nowrap;
+}
+
+.weekbrief-field-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 9pt;
+  outline: none;
+  min-width: 0;
+}
+
+/* TABELA GŁÓWNA */
+.weekbrief-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid #000;
+  table-layout: fixed;
+}
+
+.weekbrief-table th,
+.weekbrief-table td {
+  border: 1px solid #000;
+  padding: 1.5mm;
+  text-align: center;
+  font-size: 9pt;
+  vertical-align: middle;
+  overflow: hidden;
+}
+
+.weekbrief-table th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+  color: #000;
+  height: 8mm;
+}
+
+/* Szerokości kolumn - dokładnie jak wzór PEZET */
+.weekbrief-table th:nth-child(1),
+.weekbrief-table td:nth-child(1) {
+  width: 6%;
+}
+
+.weekbrief-table th:nth-child(2),
+.weekbrief-table td:nth-child(2) {
+  width: 30%;
+  text-align: left;
+  padding-left: 2mm;
+}
+
+.weekbrief-table th:nth-child(3),
+.weekbrief-table td:nth-child(3) {
+  width: 22%;
+  text-align: left;
+  padding-left: 2mm;
+}
+
+/* Dni tygodnia (Ma, Di, Wo, Do, Vr, Za) */
+.weekbrief-table th:nth-child(4),
+.weekbrief-table th:nth-child(5),
+.weekbrief-table th:nth-child(6),
+.weekbrief-table th:nth-child(7),
+.weekbrief-table th:nth-child(8),
+.weekbrief-table th:nth-child(9),
+.weekbrief-table td:nth-child(4),
+.weekbrief-table td:nth-child(5),
+.weekbrief-table td:nth-child(6),
+.weekbrief-table td:nth-child(7),
+.weekbrief-table td:nth-child(8),
+.weekbrief-table td:nth-child(9) {
+  width: 5%;
+}
+
+/* Totaal uren */
+.weekbrief-table th:nth-child(10),
+.weekbrief-table td:nth-child(10) {
+  width: 7%;
+  font-weight: bold;
+}
+
+/* Wiersze danych */
+.weekbrief-table tbody tr {
+  height: 7mm;
+}
+
+/* Wiersz Tot. uren */
+.weekbrief-table .total-row {
+  background-color: #f8f8f8;
+  font-weight: bold;
+  height: 8mm;
+}
+
+.weekbrief-table .total-row td:nth-child(1) {
+  border-right: 1px solid #000;
+}
+
+.weekbrief-table .total-row td:nth-child(2) {
+  text-align: left;
+  padding-left: 2mm;
+}
+
+/* Wiersz Paraf Uitvoerder */
+.weekbrief-table .signature-row {
+  height: 15mm;
+  background: white;
+}
+
+.weekbrief-table .signature-row td:nth-child(1) {
+  border-right: 1px solid #000;
+}
+
+.weekbrief-table .signature-row td:nth-child(2) {
+  text-align: left;
+  padding-left: 2mm;
+  font-weight: bold;
+  vertical-align: top;
+  padding-top: 2mm;
+}
+
+/* Input w komórkach (dla edytowalnej wersji) */
+.weekbrief-table input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-size: 9pt;
+  padding: 0;
+  outline: none;
+}
+
+.weekbrief-table td:nth-child(2) input,
+.weekbrief-table td:nth-child(3) input {
+  text-align: left;
+}
+
+/* Tryb druku */
+@media print {
+  .weekbrief-template {
+    margin: 0;
+    padding: 10mm;
+    box-shadow: none;
+  }
+  
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
+
+/* Landscape mode */
+.weekbrief-template.landscape {
+  width: 297mm;
+  height: 210mm;
+}
+
+/* Rozmiary */
+.weekbrief-template.size-a5 {
+  width: 148mm;
+  min-height: 210mm;
+  padding: 8mm;
+}
+
+.weekbrief-template.size-a3 {
+  width: 297mm;
+  min-height: 420mm;
+  padding: 15mm;
+}

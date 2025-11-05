@@ -1,0 +1,24 @@
+{
+  "name": "MESSU BOUW - Invoice Manager",
+  "short_name": "MESSU BOUW",
+  "description": "Profesjonalne zarządzanie fakturami - offline, lokalnie, bezpiecznie",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0EA5E9",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "pl",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "permissions": ["clipboard-read", "clipboard-write"]
+}
