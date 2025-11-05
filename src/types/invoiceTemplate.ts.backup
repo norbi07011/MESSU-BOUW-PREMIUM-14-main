@@ -56,7 +56,7 @@ export interface InvoiceTemplateLayout {
   logo?: {
     url?: string;
     position: 'left' | 'center' | 'right';
-    size: { width: number; height: number };  // Changed from 'small' | 'medium' | 'large'
+    size: 'small' | 'medium' | 'large';
     showInHeader: boolean;
   };
   createdAt: Date;

@@ -613,7 +613,7 @@ export default function Reports() {
           <Card className="mt-4 bg-white/95 border-blue-200">
             <CardContent className="pt-6">
               <div className="flex gap-3 mb-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-sky-600 flex items-center justify-center text-white font-bold shadow-lg">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-sky-600 flex items-center justify-center text-white font-bold shadow-lg">
                   📊
                 </div>
                 <div>
@@ -806,7 +806,7 @@ export default function Reports() {
           <Card className="mt-4 bg-white/95 backdrop-blur-md border-blue-200">
             <CardContent className="pt-6">
               <div className="flex gap-3 mb-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-sky-600 shadow-lg flex items-center justify-center text-white font-bold">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-sky-600 shadow-lg flex items-center justify-center text-white font-bold">
                   📊
                 </div>
                 <div>
@@ -943,7 +943,7 @@ export default function Reports() {
           <Card className="mt-4 bg-white/95 backdrop-blur-md border-blue-200">
             <CardContent className="pt-6">
               <div className="flex gap-3 mb-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-sky-600 shadow-lg flex items-center justify-center text-white font-bold">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-sky-600 shadow-lg flex items-center justify-center text-white font-bold">
                   🚗
                 </div>
                 <div>
@@ -1107,7 +1107,7 @@ export default function Reports() {
           <Card className="mt-4 bg-white/95 backdrop-blur-md border-blue-200">
             <CardContent className="pt-6">
               <div className="flex gap-3 mb-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-sky-600 flex items-center justify-center text-white font-bold">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-sky-600 flex items-center justify-center text-white font-bold">
                   🎯
                 </div>
                 <div>

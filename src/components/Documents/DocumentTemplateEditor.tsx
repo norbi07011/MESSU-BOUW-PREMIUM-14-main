@@ -116,6 +116,8 @@ function SortableBlockItem({ block, index, updateBlock, removeBlock, duplicateBl
           value={block.type}
           onChange={(e) => updateBlock(block.id, { type: e.target.value as BlockType })}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+          aria-label="Typ bloku dokumentu"
+          title="Wybierz typ bloku"
         >
           <option value="header">Nagłówek (Header)</option>
           <option value="title">Tytuł (Title)</option>
@@ -153,6 +155,8 @@ function SortableBlockItem({ block, index, updateBlock, removeBlock, duplicateBl
             value={block.alignment || 'left'}
             onChange={(e) => updateBlock(block.id, { alignment: e.target.value as any })}
             className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+            aria-label="Wyrównanie tekstu"
+            title="Wybierz wyrównanie tekstu"
           >
             <option value="left">Lewo</option>
             <option value="center">Środek</option>
@@ -202,6 +206,8 @@ function SortableBlockItem({ block, index, updateBlock, removeBlock, duplicateBl
             min={8}
             max={24}
             className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+            title="Rozmiar czcionki (px)"
+            aria-label="Rozmiar czcionki w pikselach"
           />
         </div>
       </div>
@@ -599,6 +605,7 @@ export default function DocumentTemplateEditor({
               accept=".json"
               onChange={handleImportJSON}
               className="hidden"
+              aria-label="Importuj szablon dokumentu JSON"
             />
             <button
               onClick={onCancel}
@@ -652,6 +659,7 @@ export default function DocumentTemplateEditor({
                 value={headerColor}
                 onChange={(e) => updateState({ ...currentState, headerColor: e.target.value }, 'Zmieniono kolor nagłówka')}
                 className="w-full h-10 rounded cursor-pointer"
+                title="Kolor nagłówka dokumentu"
               />
             </div>
 
@@ -664,6 +672,7 @@ export default function DocumentTemplateEditor({
                 value={accentColor}
                 onChange={(e) => updateState({ ...currentState, accentColor: e.target.value }, 'Zmieniono kolor akcentu')}
                 className="w-full h-10 rounded cursor-pointer"
+                title="Kolor akcentu dokumentu"
               />
             </div>
 
@@ -676,6 +685,7 @@ export default function DocumentTemplateEditor({
                 value={textColor}
                 onChange={(e) => updateState({ ...currentState, textColor: e.target.value }, 'Zmieniono kolor tekstu')}
                 className="w-full h-10 rounded cursor-pointer"
+                title="Kolor tekstu dokumentu"
               />
             </div>
           </div>
@@ -697,8 +707,6 @@ export default function DocumentTemplateEditor({
               onShowLogoChange={(show) => updateState({ ...currentState, showLogo: show }, 'Zmieniono widoczność logo')}
               logoPosition={logoPosition}
               onLogoPositionChange={(pos) => updateState({ ...currentState, logoPosition: pos }, 'Zmieniono pozycję logo')}
-              logoSize={logoSize}
-              onLogoSizeChange={(size) => updateState({ ...currentState, logoSize: size }, 'Zmieniono rozmiar logo')}
             />
           </div>
 
@@ -714,6 +722,7 @@ export default function DocumentTemplateEditor({
                   value={marginTop}
                   onChange={(e) => updateState({ ...currentState, marginTop: Number(e.target.value) }, 'Zmieniono margines')}
                   className="w-full"
+                  title="Margines górny (10-50mm)"
                 />
               </div>
               <div>
@@ -725,6 +734,7 @@ export default function DocumentTemplateEditor({
                   value={marginBottom}
                   onChange={(e) => updateState({ ...currentState, marginBottom: Number(e.target.value) }, 'Zmieniono margines')}
                   className="w-full"
+                  title="Margines dolny (10-50mm)"
                 />
               </div>
               <div>
@@ -736,6 +746,7 @@ export default function DocumentTemplateEditor({
                   value={marginLeft}
                   onChange={(e) => updateState({ ...currentState, marginLeft: Number(e.target.value) }, 'Zmieniono margines')}
                   className="w-full"
+                  title="Margines lewy (10-50mm)"
                 />
               </div>
               <div>
@@ -747,6 +758,7 @@ export default function DocumentTemplateEditor({
                   value={marginRight}
                   onChange={(e) => updateState({ ...currentState, marginRight: Number(e.target.value) }, 'Zmieniono margines')}
                   className="w-full"
+                  title="Margines prawy (10-50mm)"
                 />
               </div>
             </div>

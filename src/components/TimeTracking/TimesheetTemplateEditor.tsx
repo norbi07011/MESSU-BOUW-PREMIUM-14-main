@@ -676,6 +676,7 @@ export const TimesheetTemplateEditor: React.FC<TimesheetTemplateEditorProps> = (
                   value={rows}
                   onChange={(e) => updateState({ rows: Number(e.target.value) }, 'Zmieniono liczbę wierszy')}
                   className="w-full px-3 py-2 border-2 border-sky-300 rounded-lg font-bold text-center"
+                  title="Liczba wierszy w tabeli czasu pracy (5-30)"
                 />
               </div>
             </div>

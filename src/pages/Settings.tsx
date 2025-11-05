@@ -17,6 +17,7 @@ import { InvoiceTemplatePreview } from '@/components/InvoiceTemplatePreview';
 import { TimesheetTemplateEditor } from '@/components/TimeTracking/TimesheetTemplateEditor';
 import { TemplateLibraryModal } from '@/components/TimeTracking/TemplateLibraryModal';
 import DocumentTemplateEditor from '@/components/Documents/DocumentTemplateEditor';
+import InvoiceTemplateEditor from '@/components/InvoiceTemplateEditor.tsx';
 import { PEZET_WEEKBRIEF_TEMPLATE, DEFAULT_TEMPLATES } from '@/components/TimeTracking/Weekbrief/defaultTemplates';
 import { getTemplateById, defaultTemplates } from '@/lib/invoice-templates';
 import { cn } from '@/lib/utils';
@@ -71,6 +72,9 @@ export default function Settings() {
   const [showTimesheetEditor, setShowTimesheetEditor] = useState(false);
   const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<typeof PEZET_WEEKBRIEF_TEMPLATE | null>(null);
+
+  // Invoice Template Editor State
+  const [showInvoiceEditor, setShowInvoiceEditor] = useState(false);
 
   // Save active templates to localStorage
   useEffect(() => {
@@ -508,33 +512,38 @@ export default function Settings() {
         </TabsContent>
 
         <TabsContent value="templates">
-          <div className="space-y-6">
-            {/* GÓRNA RAMKA - Edytor wizualny (Coming Soon) */}
-            <Card className="border-2 border-sky-300 bg-linear-to-r from-sky-50 to-blue-50">
-              <CardContent className="p-8">
-                <div className="text-center space-y-4">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-sky-100">
-                    <svg className="w-8 h-8 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
-                    </svg>
+          {showInvoiceEditor ? (
+            <InvoiceTemplateEditor 
+              onBack={() => setShowInvoiceEditor(false)}
+            />
+          ) : (
+            <div className="space-y-6">
+              {/* GÓRNA RAMKA - Edytor wizualny */}
+              <Card className="border-2 border-sky-300 bg-linear-to-r from-sky-50 to-blue-50">
+                <CardContent className="p-8">
+                  <div className="text-center space-y-4">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-sky-100">
+                      <svg className="w-8 h-8 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">Edytor wizualny faktur</h3>
+                      <p className="text-gray-700 max-w-2xl mx-auto">
+                        Twórz własne layouty faktur! Przeciągaj bloki (logo, dane klienta, tabela pozycji), 
+                        zmieniaj kolory, czcionki - podobnie jak w edytorze Timesheet Templates!
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => setShowInvoiceEditor(true)}
+                      className="px-6 py-3 bg-linear-to-r from-sky-500 to-blue-600 text-white rounded-lg hover:from-sky-600 hover:to-blue-700 transition-all flex items-center gap-2 font-semibold shadow-lg shadow-sky-200/50 mx-auto"
+                    >
+                      <Plus size={20} weight="bold" />
+                      Nowy szablon faktury
+                    </button>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Edytor wizualny faktur - Wkrótce!</h3>
-                    <p className="text-gray-700 max-w-2xl mx-auto">
-                      Niedługo będziesz mógł tworzyć własne layouty faktur. Przeciągaj bloki (logo, dane klienta, tabela pozycji), 
-                      zmieniaj kolory, czcionki - podobnie jak w edytorze Timesheet Templates!
-                    </p>
-                  </div>
-                  <button 
-                    disabled
-                    className="px-6 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed flex items-center gap-2 font-semibold mx-auto"
-                  >
-                    <Plus size={20} weight="bold" />
-                    Nowy szablon (wkrótce)
-                  </button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
             {/* DOLNA RAMKA - Galeria wszystkich szablonów */}
             <Card>
@@ -628,7 +637,8 @@ export default function Settings() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="timesheet-templates">

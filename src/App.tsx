@@ -18,7 +18,7 @@ import Settings from './pages/Settings';
 import Kilometers from './pages/Kilometers';
 import { BTWAangifte } from './pages/BTWAangifte';
 import Expenses from './pages/Expenses';
-import Documents from './pages/Documents';
+import Documents from './pages/Documents.tsx';
 
 type Page = 'reports' | 'invoices' | 'invoices-new' | 'clients' | 'products' | 'expenses' | 'kilometers' | 'timesheets' | 'btw' | 'settings' | 'documents';
 

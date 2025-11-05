@@ -149,7 +149,7 @@ export default function RichTextEditor({ value, onChange, className = '' }: Rich
   return (
     <div className={`border border-sky-200 rounded-lg overflow-hidden ${className}`}>
       {/* TOOLBAR */}
-      <div className="bg-gradient-to-r from-sky-50 to-blue-50 border-b border-sky-200 p-2 flex flex-wrap items-center gap-1">
+      <div className="bg-linear-to-r from-sky-50 to-blue-50 border-b border-sky-200 p-2 flex flex-wrap items-center gap-1">
         
         {/* Font Family */}
         <Select value={fontFamily} onValueChange={(val) => { setFontFamily(val); execCommand('fontName', val); }}>
@@ -261,6 +261,8 @@ export default function RichTextEditor({ value, onChange, className = '' }: Rich
                     setSelectedColor(color);
                     execCommand('foreColor', color);
                   }}
+                  title={`Kolor tekstu: ${color}`}
+                  aria-label={`Ustaw kolor tekstu na ${color}`}
                 />
               ))}
             </div>
@@ -307,6 +309,8 @@ export default function RichTextEditor({ value, onChange, className = '' }: Rich
                     setBgColor(color);
                     execCommand('backColor', color);
                   }}
+                  title={`Kolor tła: ${color}`}
+                  aria-label={`Ustaw kolor tła na ${color}`}
                 />
               ))}
             </div>
@@ -397,6 +401,7 @@ export default function RichTextEditor({ value, onChange, className = '' }: Rich
           accept="image/*"
           className="hidden"
           onChange={handleImageUpload}
+          aria-label="Dodaj zdjęcie do dokumentu"
         />
 
         {/* Table */}

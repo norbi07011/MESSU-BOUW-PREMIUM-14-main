@@ -11,8 +11,11 @@ import { Palette } from '@phosphor-icons/react';
 interface ColorPickerDualProps {
   startColor: string;
   endColor: string;
-  onStartColorChange: (color: string) => void;
-  onEndColorChange: (color: string) => void;
+  // Support both naming conventions for backward compatibility
+  onStartColorChange?: (color: string) => void;
+  onEndColorChange?: (color: string) => void;
+  onStartChange?: (color: string) => void;
+  onEndChange?: (color: string) => void;
   label?: string;
 }
 
@@ -21,8 +24,20 @@ export const ColorPickerDual: React.FC<ColorPickerDualProps> = ({
   endColor,
   onStartColorChange,
   onEndColorChange,
+  onStartChange,
+  onEndChange,
   label = 'Gradient'
 }) => {
+  // Use either naming convention
+  const handleStartChange = (color: string) => {
+    if (onStartColorChange) onStartColorChange(color);
+    if (onStartChange) onStartChange(color);
+  };
+  
+  const handleEndChange = (color: string) => {
+    if (onEndColorChange) onEndColorChange(color);
+    if (onEndChange) onEndChange(color);
+  };
   return (
     <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-sky-300">
       <div className="flex items-center gap-3 mb-4">
@@ -38,14 +53,14 @@ export const ColorPickerDual: React.FC<ColorPickerDualProps> = ({
             <input
               type="color"
               value={startColor}
-              onChange={(e) => onStartColorChange(e.target.value)}
+              onChange={(e) => handleStartChange(e.target.value)}
               className="w-16 h-12 rounded-lg border-2 border-gray-300 cursor-pointer"
               title="Wybierz kolor początkowy gradientu"
             />
             <input
               type="text"
               value={startColor}
-              onChange={(e) => onStartColorChange(e.target.value)}
+              onChange={(e) => handleStartChange(e.target.value)}
               className="flex-1 px-3 py-2 border-2 border-sky-300 rounded-lg font-mono text-sm"
               placeholder="#0ea5e9"
             />
@@ -59,14 +74,14 @@ export const ColorPickerDual: React.FC<ColorPickerDualProps> = ({
             <input
               type="color"
               value={endColor}
-              onChange={(e) => onEndColorChange(e.target.value)}
+              onChange={(e) => handleEndChange(e.target.value)}
               className="w-16 h-12 rounded-lg border-2 border-gray-300 cursor-pointer"
               title="Wybierz kolor końcowy gradientu"
             />
             <input
               type="text"
               value={endColor}
-              onChange={(e) => onEndColorChange(e.target.value)}
+              onChange={(e) => handleEndChange(e.target.value)}
               className="flex-1 px-3 py-2 border-2 border-sky-300 rounded-lg font-mono text-sm"
               placeholder="#2563eb"
             />

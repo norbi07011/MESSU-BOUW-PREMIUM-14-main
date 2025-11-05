@@ -25,7 +25,7 @@ export function ThemeSwitcher() {
         flex items-center justify-center
         transition-all duration-300
         ${isDark 
-          ? 'bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/30 hover:border-blue-400/60 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]' 
+          ? 'bg-linear-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/30 hover:border-blue-400/60 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]' 
           : 'bg-white border border-sky-200 hover:border-sky-400 shadow-sm hover:shadow-md'
         }
       `}
@@ -33,7 +33,7 @@ export function ThemeSwitcher() {
     >
       {/* GLOW EFFECT (tylko dark mode) */}
       {isDark && (
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm" />
+        <div className="absolute inset-0 rounded-xl bg-linear-to-br from-purple-500/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm" />
       )}
       
       {/* IKONA */}
@@ -104,7 +104,7 @@ export function ThemeSwitcherWithLabel() {
         flex items-center gap-3 px-4 py-2.5 rounded-xl
         transition-all duration-300
         ${isDark 
-          ? 'bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 hover:border-cyan-400 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)]' 
+          ? 'bg-linear-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 hover:border-cyan-400 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)]' 
           : 'bg-white border border-sky-200 hover:border-sky-400 text-sky-600 shadow-sm hover:shadow-md'
         }
       `}
@@ -138,7 +138,7 @@ export function ThemeSwitcherToggle() {
         relative w-16 h-8 rounded-full cursor-pointer
         transition-all duration-300
         ${isDark 
-          ? 'bg-gradient-to-r from-cyan-600 to-blue-600 shadow-[0_0_20px_rgba(6,182,212,0.4)]' 
+          ? 'bg-linear-to-r from-cyan-600 to-blue-600 shadow-[0_0_20px_rgba(6,182,212,0.4)]' 
           : 'bg-sky-200'
         }
       `}
