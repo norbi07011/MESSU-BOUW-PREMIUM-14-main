@@ -723,12 +723,7 @@ export default function Settings() {
                           <div className="bg-white rounded shadow-sm p-3 border border-gray-200">
                             {/* Header z gradientem */}
                             <div 
-                              className="h-12 rounded mb-2 flex items-center justify-center text-white font-bold text-sm"
-                              style={{ 
-                                background: template.config.colors 
-                                  ? `linear-gradient(135deg, ${template.config.colors.start}, ${template.config.colors.end})`
-                                  : '#0ea5e9' // fallback sky-500
-                              }}
+                              className="h-12 rounded mb-2 flex items-center justify-center text-white font-bold text-sm bg-sky-500"
                             >
                               {template.name.length > 15 ? template.name.substring(0, 15) + '...' : template.name}
                             </div>

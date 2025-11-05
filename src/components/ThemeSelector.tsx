@@ -16,7 +16,7 @@ const themes: Array<{ id: Theme; name: string; color: string; description: strin
     description: 'Czarny tekst + niebieski akcent'
   },
   { 
-    id: 'dark-blue', 
+    id: 'light' as Theme, 
     name: 'Ciemny', 
     color: '#3B82F6',
     description: 'Czarny + niebieski neon'
