@@ -32,11 +32,15 @@ import {
   Eye, 
   EyeSlash,
   ListBullets,
-  Image as ImageIcon
+  Image as ImageIcon,
+  FacebookLogo,
+  LinkedinLogo,
+  InstagramLogo,
+  TwitterLogo
 } from '@phosphor-icons/react';
 import type { InvoiceBlock, InvoiceTemplateLayout, InvoiceBlockType } from '@/types/invoiceTemplate';
 import { useUndoRedo, useUndoRedoKeyboard } from '@/hooks/useUndoRedo';
-import { ColorPickerDual, FontControls, LogoControls, UndoRedoToolbar } from '@/components/shared/TemplateEditor';
+import { ColorPickerDual, FontControls, LogoControls, UndoRedoToolbar, LiveInvoicePreview } from '@/components/shared/TemplateEditor';
 import {
   DndContext,
   closestCenter,
@@ -81,6 +85,29 @@ interface EditorState {
   logoHeight: number;  // Height in px
   logoOpacity: number;  // 0-100%
   showLogo: boolean;
+  // NEW: QR Code settings
+  qrCode: {
+    enabled: boolean;
+    position: 'top-right' | 'bottom-right' | 'bottom-left';
+    size: number; // 80-200px
+    data: string; // Payment URL or text
+  };
+  // NEW: Warning Box (yellow alert for reverse charge/important info)
+  warningBox: {
+    enabled: boolean;
+    text: string;
+    backgroundColor: string;
+    textColor: string;
+    icon: string; // emoji or unicode
+  };
+  // NEW: Social Media links (footer icons)
+  socialMedia: {
+    enabled: boolean;
+    facebook?: string;
+    linkedin?: string;
+    instagram?: string;
+    twitter?: string;
+  };
   pageSize: 'A4' | 'Letter';
   orientation: 'portrait' | 'landscape';
 }
@@ -294,6 +321,29 @@ export default function InvoiceTemplateEditor({ existingTemplate, onBack }: Invo
     logoHeight: existingTemplate?.logo?.size?.height || 60,
     logoOpacity: 100,
     showLogo: existingTemplate?.logo?.showInHeader ?? true,
+    // NEW: QR Code settings
+    qrCode: {
+      enabled: false,
+      position: 'bottom-right',
+      size: 100,
+      data: '', // Will be filled with payment data
+    },
+    // NEW: Warning Box (reverse charge warning)
+    warningBox: {
+      enabled: false,
+      text: '⚠️ REVERSE CHARGE: BTW verlegd naar de afnemer volgens artikel 12b Wet OB',
+      backgroundColor: '#fef3c7', // yellow-100
+      textColor: '#92400e', // yellow-900
+      icon: '⚠️',
+    },
+    // NEW: Social Media links
+    socialMedia: {
+      enabled: false,
+      facebook: '',
+      linkedin: '',
+      instagram: '',
+      twitter: '',
+    },
     pageSize: existingTemplate?.pageSize || 'A4',
     orientation: existingTemplate?.orientation || 'portrait',
   };
@@ -331,6 +381,9 @@ export default function InvoiceTemplateEditor({ existingTemplate, onBack }: Invo
     logoHeight,
     logoOpacity,
     showLogo,
+    qrCode,
+    warningBox,
+    socialMedia,
     pageSize,
     orientation,
   } = currentState;
@@ -776,15 +829,9 @@ export default function InvoiceTemplateEditor({ existingTemplate, onBack }: Invo
           {/* CENTER PANEL - Fixed A4 Preview (Sticky) */}
           <div className="flex-1 flex justify-center">
             <div className="sticky top-6 h-fit">
-              <div className="bg-white rounded-3xl shadow-2xl p-8 transform hover:scale-[1.01] transition-transform duration-300">
-                <div className="w-[595px] h-[842px] bg-white shadow-inner overflow-hidden relative border-2 border-gray-200 rounded-xl">
-                  {/* Live Invoice Preview */}
-                  <div className="text-center py-32">
-                    <h2 className="text-3xl font-bold text-gray-300 mb-4">Podgląd faktury</h2>
-                    <p className="text-gray-400 text-lg">Tutaj pojawi się live preview faktury</p>
-                    <p className="text-sm text-gray-300 mt-3">Format A4: 595×842px</p>
-                  </div>
-                </div>
+              <div className="bg-white rounded-3xl shadow-2xl transform hover:scale-[1.01] transition-transform duration-300">
+                {/* Live Invoice Preview - Real-time rendering */}
+                <LiveInvoicePreview state={currentState} />
               </div>
             </div>
           </div>
@@ -890,6 +937,169 @@ export default function InvoiceTemplateEditor({ existingTemplate, onBack }: Invo
                           title="Rozmiar małych elementów"
                         />
                       </div>
+                    </div>
+                  </div>
+
+                  {/* QR Code Settings */}
+                  <div className="pb-6 border-b border-gray-200">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">📱 Kod QR</h3>
+                    
+                    <div className="space-y-4">
+                      {/* Enable QR Code */}
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={qrCode.enabled}
+                          onChange={(e) => updateState({ qrCode: { ...qrCode, enabled: e.target.checked } }, 'Włączono/wyłączono QR')}
+                          className="w-5 h-5 text-sky-600 border-gray-300 rounded focus:ring-sky-500"
+                        />
+                        <span className="text-sm font-semibold text-gray-700">Pokaż kod QR na fakturze</span>
+                      </label>
+
+                      {qrCode.enabled && (
+                        <>
+                          {/* QR Position */}
+                          <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Pozycja</label>
+                            <select
+                              value={qrCode.position}
+                              onChange={(e) => updateState({ qrCode: { ...qrCode, position: e.target.value as any } }, 'Zmieniono pozycję QR')}
+                              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm font-semibold focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition-all"
+                            >
+                              <option value="top-right">Góra - prawy róg</option>
+                              <option value="bottom-right">Dół - prawy róg</option>
+                              <option value="bottom-left">Dół - lewy róg</option>
+                            </select>
+                          </div>
+
+                          {/* QR Size */}
+                          <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">
+                              Rozmiar: {qrCode.size}px
+                            </label>
+                            <input
+                              type="range"
+                              min="80"
+                              max="200"
+                              value={qrCode.size}
+                              onChange={(e) => updateState({ qrCode: { ...qrCode, size: parseInt(e.target.value) } }, 'Zmieniono rozmiar QR')}
+                              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-sky-500"
+                            />
+                          </div>
+
+                          {/* QR Data */}
+                          <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Dane QR</label>
+                            <input
+                              type="text"
+                              value={qrCode.data}
+                              onChange={(e) => updateState({ qrCode: { ...qrCode, data: e.target.value } }, 'Zmieniono dane QR')}
+                              placeholder="https://payment.nl/pay/INV-001"
+                              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition-all"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Link do płatności lub IBAN</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Warning Box Settings */}
+                  <div className="pb-6 border-b border-gray-200">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">⚠️ Ostrzeżenie</h3>
+                    
+                    <div className="space-y-4">
+                      {/* Enable Warning Box */}
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={warningBox.enabled}
+                          onChange={(e) => updateState({ warningBox: { ...warningBox, enabled: e.target.checked } }, 'Włączono/wyłączono ostrzeżenie')}
+                          className="w-5 h-5 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+                        />
+                        <span className="text-sm font-semibold text-gray-700">Pokaż żółte ostrzeżenie</span>
+                      </label>
+
+                      {warningBox.enabled && (
+                        <>
+                          {/* Warning Text */}
+                          <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">Tekst ostrzeżenia</label>
+                            <textarea
+                              value={warningBox.text}
+                              onChange={(e) => updateState({ warningBox: { ...warningBox, text: e.target.value } }, 'Zmieniono tekst ostrzeżenia')}
+                              rows={3}
+                              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Np. reverse charge, warunki płatności</p>
+                          </div>
+
+                          {/* Warning Colors */}
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-sm font-bold text-gray-700 mb-2">Kolor tła</label>
+                              <input
+                                type="color"
+                                value={warningBox.backgroundColor}
+                                onChange={(e) => updateState({ warningBox: { ...warningBox, backgroundColor: e.target.value } }, 'Zmieniono kolor tła')}
+                                className="w-full h-12 border-2 border-gray-300 rounded-xl cursor-pointer"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-bold text-gray-700 mb-2">Kolor tekstu</label>
+                              <input
+                                type="color"
+                                value={warningBox.textColor}
+                                onChange={(e) => updateState({ warningBox: { ...warningBox, textColor: e.target.value } }, 'Zmieniono kolor tekstu')}
+                                className="w-full h-12 border-2 border-gray-300 rounded-xl cursor-pointer"
+                              />
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Social Media Links */}
+                  <div className="pb-6 border-b border-gray-200">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">📱 Social Media</h3>
+                    
+                    <div className="space-y-3">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={socialMedia.enabled}
+                          onChange={(e) => updateState({ socialMedia: { ...socialMedia, enabled: e.target.checked } }, 'Social media toggle')}
+                          className="w-5 h-5 text-blue-600 border-gray-300 rounded"
+                        />
+                        <span className="text-sm font-semibold">Pokaż ikony social media</span>
+                      </label>
+
+                      {socialMedia.enabled && (
+                        <div className="grid grid-cols-1 gap-2">
+                          <input
+                            type="url"
+                            value={socialMedia.facebook || ''}
+                            onChange={(e) => updateState({ socialMedia: { ...socialMedia, facebook: e.target.value } }, 'Facebook URL')}
+                            placeholder="https://facebook.com/..."
+                            className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm"
+                          />
+                          <input
+                            type="url"
+                            value={socialMedia.linkedin || ''}
+                            onChange={(e) => updateState({ socialMedia: { ...socialMedia, linkedin: e.target.value } }, 'LinkedIn URL')}
+                            placeholder="https://linkedin.com/..."
+                            className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm"
+                          />
+                          <input
+                            type="url"
+                            value={socialMedia.instagram || ''}
+                            onChange={(e) => updateState({ socialMedia: { ...socialMedia, instagram: e.target.value } }, 'Instagram URL')}
+                            placeholder="https://instagram.com/..."
+                            className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
 

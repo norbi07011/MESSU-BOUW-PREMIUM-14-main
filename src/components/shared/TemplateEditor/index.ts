@@ -8,3 +8,4 @@ export { FontControls } from './FontControls';
 export { LogoControls } from './LogoControls';
 export { UndoRedoToolbar } from './UndoRedoToolbar';
 export { ColorThemeSelector } from './ColorThemeSelector';
+export { default as LiveInvoicePreview } from './LiveInvoicePreview';

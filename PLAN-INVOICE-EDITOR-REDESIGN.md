@@ -9,7 +9,7 @@
 
 ### **OBECNE KOMPONENTY:**
 
-#### 1. **InvoiceTemplateEditor.tsx** (899 linii)
+
 **Status:** ⚠️ Layout wymaga naprawy
 - **TOP BAR:** Sticky header z nazwą szablonu + przyciski (Export/Import/Undo/Redo/Save)
 - **LAYOUT:** `grid-cols-2` (2 kolumny obok siebie) - **PROBLEM: wymaga scrollowania "kilometr do dołu"**
