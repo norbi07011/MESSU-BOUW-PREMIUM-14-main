@@ -966,6 +966,8 @@ export default function InvoiceTemplateEditor({ existingTemplate, onBack }: Invo
                               value={qrCode.position}
                               onChange={(e) => updateState({ qrCode: { ...qrCode, position: e.target.value as any } }, 'Zmieniono pozycję QR')}
                               className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm font-semibold focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition-all"
+                              aria-label="Pozycja kodu QR"
+                              title="Wybierz pozycję kodu QR na fakturze"
                             >
                               <option value="top-right">Góra - prawy róg</option>
                               <option value="bottom-right">Dół - prawy róg</option>
@@ -985,6 +987,8 @@ export default function InvoiceTemplateEditor({ existingTemplate, onBack }: Invo
                               value={qrCode.size}
                               onChange={(e) => updateState({ qrCode: { ...qrCode, size: parseInt(e.target.value) } }, 'Zmieniono rozmiar QR')}
                               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-sky-500"
+                              aria-label="Rozmiar kodu QR"
+                              title="Rozmiar kodu QR (80-200px)"
                             />
                           </div>
 
@@ -1031,6 +1035,9 @@ export default function InvoiceTemplateEditor({ existingTemplate, onBack }: Invo
                               onChange={(e) => updateState({ warningBox: { ...warningBox, text: e.target.value } }, 'Zmieniono tekst ostrzeżenia')}
                               rows={3}
                               className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all"
+                              placeholder="⚠️ REVERSE CHARGE: BTW verlegd naar de afnemer..."
+                              aria-label="Tekst ostrzeżenia"
+                              title="Wprowadź treść ostrzeżenia (np. reverse charge, warunki płatności)"
                             />
                             <p className="text-xs text-gray-500 mt-1">Np. reverse charge, warunki płatności</p>
                           </div>
@@ -1044,6 +1051,8 @@ export default function InvoiceTemplateEditor({ existingTemplate, onBack }: Invo
                                 value={warningBox.backgroundColor}
                                 onChange={(e) => updateState({ warningBox: { ...warningBox, backgroundColor: e.target.value } }, 'Zmieniono kolor tła')}
                                 className="w-full h-12 border-2 border-gray-300 rounded-xl cursor-pointer"
+                                aria-label="Kolor tła ostrzeżenia"
+                                title="Wybierz kolor tła dla box'a ostrzeżenia"
                               />
                             </div>
                             <div>
@@ -1053,6 +1062,8 @@ export default function InvoiceTemplateEditor({ existingTemplate, onBack }: Invo
                                 value={warningBox.textColor}
                                 onChange={(e) => updateState({ warningBox: { ...warningBox, textColor: e.target.value } }, 'Zmieniono kolor tekstu')}
                                 className="w-full h-12 border-2 border-gray-300 rounded-xl cursor-pointer"
+                                aria-label="Kolor tekstu ostrzeżenia"
+                                title="Wybierz kolor tekstu w box'ie ostrzeżenia"
                               />
                             </div>
                           </div>
