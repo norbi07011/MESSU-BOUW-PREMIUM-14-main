@@ -692,243 +692,243 @@ export default function InvoiceTemplateEditor({ existingTemplate, onBack }: Invo
         </div>
       </div>
 
-      {/* MAIN LAYOUT: LEFT | CENTER | RIGHT */}
-      <div className="h-[calc(100vh-64px)] flex gap-3 p-3">
-        {/* LEFT PANEL - JEDNA RAMKA */}
-        <div className="w-96 bg-white rounded-xl shadow-lg border-2 border-gray-200 p-4 overflow-hidden h-full">
-          <div className="grid grid-cols-2 gap-4 h-full">
-            {/* Logo Section */}
-            <div className="overflow-hidden">
-              <h3 className="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
-                <ImageIcon size={18} weight="bold" className="text-sky-600" />
-                Logo
-              </h3>
-              <LogoControls
-                logoUrl={logoUrl}
-                onLogoUpload={(url) => updateState({ logoUrl: url }, 'Dodano logo')}
-                showLogo={showLogo}
-                onShowLogoChange={(show) => updateState({ showLogo: show }, 'Przełączono logo')}
-                logoPosition={logoPosition}
-                onLogoPositionChange={(pos) => updateState({ logoPosition: pos }, 'Zmieniono pozycję logo')}
-                logoX={logoX}
-                logoY={logoY}
-                logoWidth={logoWidth}
-                logoHeight={logoHeight}
-                logoOpacity={logoOpacity}
-                onLogoPositionXY={(x, y) => updateState({ logoX: x, logoY: y }, 'Przesunięto logo')}
-                onLogoResize={(w, h) => updateState({ logoWidth: w, logoHeight: h }, 'Zmieniono rozmiar logo')}
-                onLogoOpacityChange={(opacity) => updateState({ logoOpacity: opacity }, 'Zmieniono przezroczystość')}
-                showLivePreview={true}
-              />
-            </div>
-
-            {/* Blocks Section */}
-            <div className="overflow-hidden">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                  <ListBullets size={20} weight="bold" className="text-sky-600" />
-                  Bloki ({blocks.length})
-                </h3>
-                <button
-                  onClick={() => addBlock('notes')}
-                  className="px-3 py-1.5 bg-sky-500 hover:bg-sky-600 text-white rounded-lg text-sm font-bold flex items-center gap-1.5 transition-all"
-                >
-                  <Plus size={16} weight="bold" />
-                  Dodaj
-                </button>
-              </div>
-
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext items={blocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
-                  <div className="space-y-3">
-                    {blocks.map((block, index) => (
-                      <SortableBlockItem
-                        key={block.id}
-                        block={block}
-                        index={index}
-                        totalBlocks={blocks.length}
-                        onUpdate={(field, value) => updateBlock(index, field, value)}
-                        onToggleVisible={() => toggleBlockVisible(index)}
-                        onDuplicate={() => duplicateBlock(index)}
-                        onRemove={() => removeBlock(index)}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            </div>
-          </div>
-        </div>
-
-        {/* CENTER PANEL - Fixed A4 Preview */}
-        <div className="flex-1 flex items-center justify-center overflow-hidden">
-          <div className="w-[595px] h-[842px] bg-white shadow-2xl overflow-hidden p-8 relative scale-90">
-            {/* Live Invoice Preview */}
-            <div className="text-center py-20">
-              <h2 className="text-2xl font-bold text-gray-400 mb-4">Podgląd faktury</h2>
-              <p className="text-gray-500">Tutaj pojawi się live preview faktury</p>
-              <p className="text-sm text-gray-400 mt-2">A4: 595x842px</p>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT PANEL - JEDNA RAMKA */}
-        <div className="w-96 bg-white rounded-xl shadow-lg border-2 border-gray-200 p-4 overflow-hidden h-full">
-          <div className="grid grid-cols-2 gap-4 h-full">
-            {/* LEFT COLUMN - Kolory + Strona */}
-            <div className="overflow-hidden space-y-4">
-              {/* Kolory */}
-              <div>
-                <h3 className="text-sm font-bold text-gray-800 mb-2">🎨 Kolory</h3>
-              
-                <div className="space-y-2">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Nagłówek</label>
-                  <ColorPickerDual
-                    startColor={headerGradientStart}
-                    endColor={headerGradientEnd}
-                    onStartChange={(color) => updateState({ headerGradientStart: color }, 'Zmieniono kolor nagłówka (start)')}
-                    onEndChange={(color) => updateState({ headerGradientEnd: color }, 'Zmieniono kolor nagłówka (koniec)')}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Primary</label>
-                  <ColorPickerDual
-                    startColor={primaryColorStart}
-                    endColor={primaryColorEnd}
-                    onStartChange={(color) => updateState({ primaryColorStart: color }, 'Zmieniono primary (start)')}
-                    onEndChange={(color) => updateState({ primaryColorEnd: color }, 'Zmieniono primary (koniec)')}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Accent</label>
-                  <ColorPickerDual
-                    startColor={accentColorStart}
-                    endColor={accentColorEnd}
-                    onStartChange={(color) => updateState({ accentColorStart: color }, 'Zmieniono accent (start)')}
-                    onEndChange={(color) => updateState({ accentColorEnd: color }, 'Zmieniono accent (koniec)')}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-600 mb-1">Tło</label>
-                    <input
-                      type="color"
-                      value={backgroundColor}
-                      onChange={(e) => updateState({ backgroundColor: e.target.value }, 'Zmieniono tło')}
-                      className="w-full h-8 rounded cursor-pointer"
-                      title="Kolor tła"
+      {/* MAIN LAYOUT: Gradient Background + 3D Panels */}
+      <div className="h-[calc(100vh-64px)] bg-linear-to-br from-sky-50 via-blue-50 to-indigo-100 p-6 overflow-y-auto">
+        <div className="max-w-[1800px] mx-auto flex gap-6">
+          
+          {/* LEFT PANEL - 3D Levitating Card */}
+          <div className="w-[420px] shrink-0">
+            <div className="sticky top-6">
+              <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 p-6 transform hover:scale-[1.02] transition-transform duration-300">
+                <div className="space-y-6">
+                  
+                  {/* Logo Section */}
+                  <div className="pb-6 border-b border-gray-200">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <ImageIcon size={22} weight="bold" className="text-sky-600" />
+                      Logo firmy
+                    </h3>
+                    <LogoControls
+                      logoUrl={logoUrl}
+                      onLogoUpload={(url) => updateState({ logoUrl: url }, 'Dodano logo')}
+                      showLogo={showLogo}
+                      onShowLogoChange={(show) => updateState({ showLogo: show }, 'Przełączono logo')}
+                      logoPosition={logoPosition}
+                      onLogoPositionChange={(pos) => updateState({ logoPosition: pos }, 'Zmieniono pozycję logo')}
+                      logoX={logoX}
+                      logoY={logoY}
+                      logoWidth={logoWidth}
+                      logoHeight={logoHeight}
+                      logoOpacity={logoOpacity}
+                      onLogoPositionXY={(x, y) => updateState({ logoX: x, logoY: y }, 'Przesunięto logo')}
+                      onLogoResize={(w, h) => updateState({ logoWidth: w, logoHeight: h }, 'Zmieniono rozmiar logo')}
+                      onLogoOpacityChange={(opacity) => updateState({ logoOpacity: opacity }, 'Zmieniono przezroczystość')}
+                      showLivePreview={true}
                     />
                   </div>
+
+                  {/* Blocks Section */}
                   <div>
-                    <label className="block text-xs font-bold text-gray-600 mb-1">Tekst</label>
-                    <input
-                      type="color"
-                      value={textColor}
-                      onChange={(e) => updateState({ textColor: e.target.value }, 'Zmieniono tekst')}
-                      className="w-full h-8 rounded cursor-pointer"
-                      title="Kolor tekstu"
-                    />
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                        <ListBullets size={22} weight="bold" className="text-sky-600" />
+                        Bloki faktury ({blocks.length})
+                      </h3>
+                      <button
+                        onClick={() => addBlock('notes')}
+                        className="px-4 py-2 bg-linear-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-sky-200/50"
+                      >
+                        <Plus size={18} weight="bold" />
+                        Dodaj
+                      </button>
+                    </div>
+
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragStart={handleDragStart}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <SortableContext items={blocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
+                        <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+                          {blocks.map((block, index) => (
+                            <SortableBlockItem
+                              key={block.id}
+                              block={block}
+                              index={index}
+                              totalBlocks={blocks.length}
+                              onUpdate={(field, value) => updateBlock(index, field, value)}
+                              onToggleVisible={() => toggleBlockVisible(index)}
+                              onDuplicate={() => duplicateBlock(index)}
+                              onRemove={() => removeBlock(index)}
+                            />
+                          ))}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
                   </div>
-                </div>
-              </div>
-              </div>
-              
-              {/* Strona */}
-              <div>
-                <h3 className="text-sm font-bold text-gray-800 mb-2">📄 Strona</h3>
-              
-                <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-xs font-bold text-gray-600 mb-1">Rozmiar</label>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => updateState({ pageSize: e.target.value as 'A4' | 'Letter' }, 'Zmieniono rozmiar')}
-                    className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm"
-                    title="Rozmiar strony"
-                  >
-                    <option value="A4">A4</option>
-                    <option value="Letter">Letter</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-600 mb-1">Orientacja</label>
-                  <select
-                    value={orientation}
-                    onChange={(e) => updateState({ orientation: e.target.value as 'portrait' | 'landscape' }, 'Zmieniono orientację')}
-                    className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm"
-                    title="Orientacja strony"
-                  >
-                    <option value="portrait">Pionowa</option>
-                    <option value="landscape">Pozioma</option>
-                  </select>
-                </div>
-              </div>
-              </div>
-            </div>
 
-            {/* RIGHT COLUMN - Fonty + Podgląd */}
-            <div className="overflow-hidden space-y-4">
-              {/* Fonts */}
-              <div>
-                <h3 className="text-sm font-bold text-gray-800 mb-2">🔤 Fonty</h3>
-              
-                <div className="space-y-2">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Nagłówki</label>
-                  <FontControls
-                    fontFamily={fontFamily.heading}
-                    fontSize={fontSize.heading}
-                    onFontFamilyChange={(family) => updateState({ fontFamily: { ...fontFamily, heading: family } }, 'Zmieniono font nagłówka')}
-                    onFontSizeChange={(size) => updateState({ fontSize: { ...fontSize, heading: size } }, 'Zmieniono rozmiar nagłówka')}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Treść</label>
-                  <FontControls
-                    fontFamily={fontFamily.body}
-                    fontSize={fontSize.body}
-                    onFontFamilyChange={(family) => updateState({ fontFamily: { ...fontFamily, body: family } }, 'Zmieniono font treści')}
-                    onFontSizeChange={(size) => updateState({ fontSize: { ...fontSize, body: size } }, 'Zmieniono rozmiar treści')}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Małe elementy (px)</label>
-                  <input
-                    type="number"
-                    value={fontSize.small}
-                    onChange={(e) => updateState({ fontSize: { ...fontSize, small: parseInt(e.target.value) } }, 'Zmieniono rozmiar małego')}
-                    className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-sm"
-                    min="6"
-                    max="12"
-                    title="Rozmiar małych elementów"
-                  />
-                </div>
-              </div>
-              </div>
-              
-              {/* Podgląd */}
-              <div>
-                <h3 className="text-base font-bold text-gray-800 mb-3">👁️ Podgląd</h3>
-                
-                <div className="space-y-2">
-                  <div className="h-10 rounded-lg border border-gray-200"></div>
-                  <div className="h-10 rounded-lg border border-gray-200"></div>
-                  <div className="h-10 rounded-lg border border-gray-200"></div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* CENTER PANEL - Fixed A4 Preview (Sticky) */}
+          <div className="flex-1 flex justify-center">
+            <div className="sticky top-6 h-fit">
+              <div className="bg-white rounded-3xl shadow-2xl p-8 transform hover:scale-[1.01] transition-transform duration-300">
+                <div className="w-[595px] h-[842px] bg-white shadow-inner overflow-hidden relative border-2 border-gray-200 rounded-xl">
+                  {/* Live Invoice Preview */}
+                  <div className="text-center py-32">
+                    <h2 className="text-3xl font-bold text-gray-300 mb-4">Podgląd faktury</h2>
+                    <p className="text-gray-400 text-lg">Tutaj pojawi się live preview faktury</p>
+                    <p className="text-sm text-gray-300 mt-3">Format A4: 595×842px</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT PANEL - 3D Levitating Card */}
+          <div className="w-[420px] shrink-0">
+            <div className="sticky top-6">
+              <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 p-6 transform hover:scale-[1.02] transition-transform duration-300">
+                <div className="space-y-6">
+                  
+                  {/* Colors Section */}
+                  <div className="pb-6 border-b border-gray-200">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">🎨 Kolory</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Nagłówek</label>
+                        <ColorPickerDual
+                          startColor={headerGradientStart}
+                          endColor={headerGradientEnd}
+                          onStartChange={(color) => updateState({ headerGradientStart: color }, 'Zmieniono kolor nagłówka (start)')}
+                          onEndChange={(color) => updateState({ headerGradientEnd: color }, 'Zmieniono kolor nagłówka (koniec)')}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Primary</label>
+                        <ColorPickerDual
+                          startColor={primaryColorStart}
+                          endColor={primaryColorEnd}
+                          onStartChange={(color) => updateState({ primaryColorStart: color }, 'Zmieniono primary (start)')}
+                          onEndChange={(color) => updateState({ primaryColorEnd: color }, 'Zmieniono primary (koniec)')}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Accent</label>
+                        <ColorPickerDual
+                          startColor={accentColorStart}
+                          endColor={accentColorEnd}
+                          onStartChange={(color) => updateState({ accentColorStart: color }, 'Zmieniono accent (start)')}
+                          onEndChange={(color) => updateState({ accentColorEnd: color }, 'Zmieniono accent (koniec)')}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-2">Tło</label>
+                          <input
+                            type="color"
+                            value={backgroundColor}
+                            onChange={(e) => updateState({ backgroundColor: e.target.value }, 'Zmieniono tło')}
+                            className="w-full h-12 rounded-xl cursor-pointer border-2 border-gray-300 hover:border-sky-400 transition-colors"
+                            title="Kolor tła"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-2">Tekst</label>
+                          <input
+                            type="color"
+                            value={textColor}
+                            onChange={(e) => updateState({ textColor: e.target.value }, 'Zmieniono tekst')}
+                            className="w-full h-12 rounded-xl cursor-pointer border-2 border-gray-300 hover:border-sky-400 transition-colors"
+                            title="Kolor tekstu"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Fonts Section */}
+                  <div className="pb-6 border-b border-gray-200">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">� Czcionki</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Nagłówki</label>
+                        <FontControls
+                          fontFamily={fontFamily.heading}
+                          fontSize={fontSize.heading}
+                          onFontFamilyChange={(family) => updateState({ fontFamily: { ...fontFamily, heading: family } }, 'Zmieniono font nagłówka')}
+                          onFontSizeChange={(size) => updateState({ fontSize: { ...fontSize, heading: size } }, 'Zmieniono rozmiar nagłówka')}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Treść</label>
+                        <FontControls
+                          fontFamily={fontFamily.body}
+                          fontSize={fontSize.body}
+                          onFontFamilyChange={(family) => updateState({ fontFamily: { ...fontFamily, body: family } }, 'Zmieniono font treści')}
+                          onFontSizeChange={(size) => updateState({ fontSize: { ...fontSize, body: size } }, 'Zmieniono rozmiar treści')}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Małe elementy (px)</label>
+                        <input
+                          type="number"
+                          value={fontSize.small}
+                          onChange={(e) => updateState({ fontSize: { ...fontSize, small: parseInt(e.target.value) } }, 'Zmieniono rozmiar małego')}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm font-semibold focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition-all"
+                          min="6"
+                          max="12"
+                          title="Rozmiar małych elementów"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Page Settings */}
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">� Ustawienia strony</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Rozmiar</label>
+                        <select
+                          value={pageSize}
+                          onChange={(e) => updateState({ pageSize: e.target.value as 'A4' | 'Letter' }, 'Zmieniono rozmiar')}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm font-semibold focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition-all"
+                          title="Rozmiar strony"
+                        >
+                          <option value="A4">A4</option>
+                          <option value="Letter">Letter</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Orientacja</label>
+                        <select
+                          value={orientation}
+                          onChange={(e) => updateState({ orientation: e.target.value as 'portrait' | 'landscape' }, 'Zmieniono orientację')}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-sm font-semibold focus:border-sky-500 focus:ring-2 focus:ring-sky-200 transition-all"
+                          title="Orientacja strony"
+                        >
+                          <option value="portrait">Pionowa</option>
+                          <option value="landscape">Pozioma</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
