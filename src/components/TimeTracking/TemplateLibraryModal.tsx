@@ -5,7 +5,21 @@
 
 import { WeekbriefTemplate } from '@/types/weekbrief';
 import { TEMPLATE_CATEGORIES, ALL_PRESET_TEMPLATES } from './templatePresets';
-import { FileText, X, Building, Code, Truck } from '@phosphor-icons/react';
+import { 
+  FileText, 
+  X, 
+  Building, 
+  Code, 
+  Truck, 
+  ShieldCheck,
+  ForkKnife,
+  Broom,
+  FirstAid,
+  ShoppingCart,
+  GraduationCap,
+  Package,
+  Briefcase
+} from '@phosphor-icons/react';
 
 interface TemplateLibraryModalProps {
   isOpen: boolean;
@@ -16,7 +30,15 @@ interface TemplateLibraryModalProps {
 const CATEGORY_ICONS = {
   construction: Building,
   it: Code,
-  transport: Truck
+  transport: Truck,
+  security: ShieldCheck,
+  catering: ForkKnife,
+  cleaning: Broom,
+  healthcare: FirstAid,
+  retail: ShoppingCart,
+  education: GraduationCap,
+  warehouse: Package,
+  freelance: Briefcase
 };
 
 export function TemplateLibraryModal({ isOpen, onClose, onSelectTemplate }: TemplateLibraryModalProps) {
@@ -47,7 +69,7 @@ export function TemplateLibraryModal({ isOpen, onClose, onSelectTemplate }: Temp
         <div className="overflow-y-auto flex-1 p-6">
           {/* Categories */}
           {Object.entries(TEMPLATE_CATEGORIES).map(([categoryKey, category]) => {
-            const Icon = CATEGORY_ICONS[categoryKey as keyof typeof CATEGORY_ICONS];
+            const Icon = CATEGORY_ICONS[categoryKey as keyof typeof CATEGORY_ICONS] || FileText;
             
             return (
               <div key={categoryKey} className="mb-8 last:mb-0">
