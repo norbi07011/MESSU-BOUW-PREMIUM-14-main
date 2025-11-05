@@ -40,7 +40,8 @@ import {
 } from '@phosphor-icons/react';
 import type { InvoiceBlock, InvoiceTemplateLayout, InvoiceBlockType } from '@/types/invoiceTemplate';
 import { useUndoRedo, useUndoRedoKeyboard } from '@/hooks/useUndoRedo';
-import { ColorPickerDual, FontControls, LogoControls, UndoRedoToolbar, LiveInvoicePreview } from '@/components/shared/TemplateEditor';
+import { ColorPickerDual, FontControls, LogoControls, UndoRedoToolbar } from '@/components/shared/TemplateEditor';
+import LiveInvoicePreview from '@/components/shared/TemplateEditor/LiveInvoicePreview';
 import {
   DndContext,
   closestCenter,

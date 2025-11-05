@@ -22,8 +22,16 @@ export default defineConfig({
       '@': resolve(projectRoot, 'src')
     }
   },
-  // PWA Configuration
+  // PWA Configuration + WebSocket HMR fix
   server: {
     host: true, // Umożliwia dostęp z innych urządzeń w sieci
+    port: 5000,
+    strictPort: false,
+    hmr: {
+      protocol: 'ws',
+      host: 'localhost',
+      port: 5000,
+      clientPort: 5000,
+    }
   },
 });
