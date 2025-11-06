@@ -620,7 +620,7 @@ ${company?.name || ''}`;
                                               </tr>
                                             </thead>
                                             <tbody>
-                                              {invoice.lines.map((line, idx) => (
+                                              {invoice.lines.map((line: any, idx: number) => (
                                                 <tr key={idx} className="border-t">
                                                   <td className="px-4 py-2">{line.description}</td>
                                                   <td className="px-4 py-2 text-right">{line.quantity}</td>

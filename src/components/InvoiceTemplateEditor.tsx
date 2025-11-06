@@ -316,11 +316,11 @@ export default function InvoiceTemplateEditor({ existingTemplate, onBack }: Invo
     logoUrl: existingTemplate?.logo?.url || '',
     logoPosition: existingTemplate?.logo?.position || 'left',
     // NEW: Advanced logo control with defaults
-    logoX: 20,
-    logoY: 20,
+    logoX: existingTemplate?.logo?.x ?? 20,
+    logoY: existingTemplate?.logo?.y ?? 20,
     logoWidth: existingTemplate?.logo?.size?.width || 120,
     logoHeight: existingTemplate?.logo?.size?.height || 60,
-    logoOpacity: 100,
+    logoOpacity: existingTemplate?.logo?.opacity ?? 100,
     showLogo: existingTemplate?.logo?.showInHeader ?? true,
     // NEW: QR Code settings
     qrCode: {
@@ -505,7 +505,10 @@ export default function InvoiceTemplateEditor({ existingTemplate, onBack }: Invo
       logo: showLogo ? {
         url: logoUrl || '',
         position: logoPosition,
+        x: logoX,
+        y: logoY,
         size: { width: logoWidth, height: logoHeight },
+        opacity: logoOpacity,
         showInHeader: showLogo,
       } : undefined,
       pageSize,

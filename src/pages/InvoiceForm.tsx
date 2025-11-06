@@ -369,7 +369,7 @@ export default function InvoiceForm({ onNavigate }: InvoiceFormProps) {
           <CardContent>
             <div className="space-y-4">
               {lines.map((line, index) => (
-                <div key={index} className="p-4 border-2 border-sky-200 rounded-lg bg-gray-50/30 hover:border-sky-300 transition-all space-y-3 bg-card">
+                <div key={index} className="p-4 border-2 border-sky-200 rounded-lg bg-card hover:border-sky-300 transition-all space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-sm">Item {index + 1}</span>
                     {lines.length > 1 && (

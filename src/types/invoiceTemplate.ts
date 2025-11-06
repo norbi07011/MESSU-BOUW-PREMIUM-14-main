@@ -56,7 +56,10 @@ export interface InvoiceTemplateLayout {
   logo?: {
     url?: string;
     position: 'left' | 'center' | 'right';
+    x?: number;  // X position for drag & drop (in px)
+    y?: number;  // Y position for drag & drop (in px)
     size: { width: number; height: number };  // Changed from 'small' | 'medium' | 'large'
+    opacity?: number;  // 0-100%
     showInHeader: boolean;
   };
   createdAt: Date;

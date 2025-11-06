@@ -65,15 +65,24 @@ export const LogoControls: React.FC<LogoControlsProps> = ({
   };
 
   // Drag & Drop handlers for logo preview
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = (e: React.MouseEvent<HTMLImageElement>) => {
     if (!onLogoPositionXY) return;
     setIsDragging(true);
     e.preventDefault();
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isDragging || !onLogoPositionXY) return;
-    onLogoPositionXY(e.clientX, e.clientY);
+    
+    // Get container bounding box
+    const container = e.currentTarget;
+    const rect = container.getBoundingClientRect();
+    
+    // Calculate position relative to container
+    const relativeX = Math.max(0, Math.min(e.clientX - rect.left, rect.width - logoWidth));
+    const relativeY = Math.max(0, Math.min(e.clientY - rect.top, rect.height - logoHeight));
+    
+    onLogoPositionXY(relativeX, relativeY);
   };
 
   const handleMouseUp = () => {
