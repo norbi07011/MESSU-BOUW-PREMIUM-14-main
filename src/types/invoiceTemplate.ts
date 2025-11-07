@@ -19,6 +19,7 @@ export interface InvoiceBlock {
   label: string;
   visible: boolean;
   order: number;
+  align?: 'left' | 'center' | 'right'; // NEW: Block alignment
   styles?: {
     backgroundColor?: string;
     textColor?: string;
@@ -43,6 +44,7 @@ export interface InvoiceTemplateLayout {
     accent?: string;
     text: string;
     background: string;
+    border?: string;
   };
   fonts: {
     heading: string;
@@ -61,6 +63,58 @@ export interface InvoiceTemplateLayout {
     size: { width: number; height: number };  // Changed from 'small' | 'medium' | 'large'
     opacity?: number;  // 0-100%
     showInHeader: boolean;
+  };
+  // NEW: Watermark (logo w tle jako tło pod całą fakturą)
+  watermark?: {
+    url?: string;
+    opacity: number;  // 5-50%
+    size: number;  // 100-600px
+    rotation: number;  // -45 to 45 degrees
+  };
+  // NEW: QR Code settings (layout only, data from Invoice.payment_qr_payload)
+  // UPDATED 2025-11-07: position now relative to Payment Details block!
+  qrCode?: {
+    enabled: boolean;
+    position: 'payment-right' | 'payment-below' | 'top-right' | 'bottom-right'; // payment-* = relative to payment block
+    size: number; // 80-200px
+  };
+  // NEW: Warning Box (styling only, text from Invoice.vat_note)
+  warningBox?: {
+    enabled: boolean;
+    backgroundColor: string;
+    textColor: string;
+    icon: string; // emoji like ⚠️
+  };
+  // NEW: Social Media (TODO: move to Company - these are company-wide!)
+  socialMedia?: {
+    enabled: boolean;
+    facebook?: string;
+    linkedin?: string;
+    instagram?: string;
+    twitter?: string;
+    youtube?: string;
+    tiktok?: string;
+    whatsapp?: string;
+    telegram?: string;
+    github?: string;
+    email?: string;
+    website?: string;
+    phone?: string;
+  };
+  // NEW: Decorative Waves (2025-11-07)
+  decorativeWaves?: {
+    enabled: boolean;
+    position: 'top' | 'bottom' | 'both';
+    opacity: number; // 0-100
+    color: string;
+  };
+  // NEW: Product Image Frames (2025-11-07)
+  imageFrames?: {
+    borderStyle: 'none' | 'solid' | 'dashed' | 'dotted' | 'double';
+    borderWidth: number; // 1-5px
+    borderColor: string;
+    borderRadius: number; // 0-20px
+    shadow: 'none' | 'sm' | 'md' | 'lg' | 'xl';
   };
   createdAt: Date;
   updatedAt: Date;

@@ -9,11 +9,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Upload, Image as ImageIcon, Plus, Copy, Printer } from '@phosphor-icons/react';
+import { Upload, Image as ImageIcon, Plus, Copy, Printer, Trash, PencilSimple } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { Company, Language, Invoice, Client } from '@/types';
 import { InvoiceTemplateSelector } from '@/components/InvoiceTemplateSelector';
 import { InvoiceTemplatePreview } from '@/components/InvoiceTemplatePreview';
+import LiveInvoicePreview from '@/components/shared/TemplateEditor/LiveInvoicePreview';
 import { TimesheetTemplateEditor } from '@/components/TimeTracking/TimesheetTemplateEditor';
 import { TemplateLibraryModal } from '@/components/TimeTracking/TemplateLibraryModal';
 import DocumentTemplateEditor from '@/components/Documents/DocumentTemplateEditor';
@@ -75,6 +76,59 @@ export default function Settings() {
 
   // Invoice Template Editor State
   const [showInvoiceEditor, setShowInvoiceEditor] = useState(false);
+  const [editingInvoiceTemplate, setEditingInvoiceTemplate] = useState<any>(null);
+  
+  // Load saved custom templates from localStorage
+  const [customTemplates, setCustomTemplates] = useState<any[]>([]);
+  const [customTimesheetTemplates, setCustomTimesheetTemplates] = useState<any[]>([]);
+  
+  useEffect(() => {
+    loadCustomTemplates();
+    loadCustomTimesheetTemplates();
+  }, [showInvoiceEditor, showTimesheetEditor]); // Reload when editors close
+  
+  const loadCustomTemplates = () => {
+    const templates: any[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith('invoice-template-')) {
+        try {
+          const template = JSON.parse(localStorage.getItem(key) || '{}');
+          templates.push(template);
+        } catch (e) {
+          console.error('Failed to parse template:', key, e);
+        }
+      }
+    }
+    setCustomTemplates(templates);
+  };
+  
+  const loadCustomTimesheetTemplates = () => {
+    const templates: any[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith('timesheet-template-')) {
+        try {
+          const template = JSON.parse(localStorage.getItem(key) || '{}');
+          templates.push(template);
+        } catch (e) {
+          console.error('Failed to parse timesheet template:', key, e);
+        }
+      }
+    }
+    setCustomTimesheetTemplates(templates);
+    
+    // Merge with default templates
+    setTimesheetTemplates([...DEFAULT_TEMPLATES, ...templates]);
+  };
+  
+  const deleteCustomTemplate = (templateId: string) => {
+    if (confirm('Czy na pewno chcesz usunąć ten szablon?')) {
+      localStorage.removeItem(`invoice-template-${templateId}`);
+      loadCustomTemplates();
+      toast.success('Szablon usunięty');
+    }
+  };
 
   // Save active templates to localStorage
   useEffect(() => {
@@ -514,7 +568,11 @@ export default function Settings() {
         <TabsContent value="templates">
           {showInvoiceEditor ? (
             <InvoiceTemplateEditor 
-              onBack={() => setShowInvoiceEditor(false)}
+              existingTemplate={editingInvoiceTemplate}
+              onBack={() => {
+                setShowInvoiceEditor(false);
+                setEditingInvoiceTemplate(null);
+              }}
             />
           ) : (
             <div className="space-y-6">
@@ -535,7 +593,10 @@ export default function Settings() {
                       </p>
                     </div>
                     <button 
-                      onClick={() => setShowInvoiceEditor(true)}
+                      onClick={() => {
+                        setEditingInvoiceTemplate(null);
+                        setShowInvoiceEditor(true);
+                      }}
                       className="px-6 py-3 bg-linear-to-r from-sky-500 to-blue-600 text-white rounded-lg hover:from-sky-600 hover:to-blue-700 transition-all flex items-center gap-2 font-semibold shadow-lg shadow-sky-200/50 mx-auto"
                     >
                       <Plus size={20} weight="bold" />
@@ -545,12 +606,161 @@ export default function Settings() {
                 </CardContent>
               </Card>
 
-            {/* DOLNA RAMKA - Galeria wszystkich szablonów */}
+            {/* MOJE SZABLONY - Custom templates created in visual builder */}
+            {customTemplates.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Moje szablony ({customTemplates.length})</CardTitle>
+                  <CardDescription>
+                    Szablony stworzone w edytorze wizualnym
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {customTemplates.map((template) => (
+                      <div 
+                        key={template.id} 
+                        className={cn(
+                          "bg-white rounded-lg overflow-hidden border-2 transition-all",
+                          activeInvoiceTemplateId === template.id 
+                            ? "border-sky-500 shadow-lg shadow-sky-200/50" 
+                            : "border-sky-300 hover:border-sky-500 hover:shadow-lg hover:shadow-sky-200/50"
+                        )}
+                      >
+                        {/* PODGLĄD GRAFICZNY - Using LiveInvoicePreview */}
+                        <div className="relative bg-gray-50 p-4 border-b-2 border-sky-200">
+                          <div 
+                            className="flex justify-center items-start overflow-hidden bg-white rounded shadow-sm" 
+                            style={{ 
+                              height: '240px',
+                              width: '100%',
+                            }}
+                          >
+                            <div 
+                              style={{ 
+                                transform: 'scale(0.22)',
+                                transformOrigin: 'top center',
+                                width: '595px', // A4 width
+                                height: '842px', // A4 height
+                              }}
+                            >
+                              <LiveInvoicePreview
+                                state={{
+                                  templateName: template.name,
+                                  blocks: template.blocks || [],
+                                  headerGradientStart: template.colors?.secondary?.split(', ')[0]?.replace('linear-gradient(to right, ', '') || '#3b82f6',
+                                  headerGradientEnd: template.colors?.secondary?.split(', ')[1]?.replace(')', '') || '#1e40af',
+                                  primaryColorStart: template.colors?.primary?.split(', ')[0]?.replace('linear-gradient(to right, ', '') || '#0ea5e9',
+                                  primaryColorEnd: template.colors?.primary?.split(', ')[1]?.replace(')', '') || '#0284c7',
+                                  accentColorStart: template.colors?.accent?.split(', ')[0]?.replace('linear-gradient(to right, ', '') || '#22c55e',
+                                  accentColorEnd: template.colors?.accent?.split(', ')[1]?.replace(')', '') || '#16a34a',
+                                  backgroundColor: template.colors?.background || '#ffffff',
+                                  textColor: template.colors?.text || '#000000',
+                                  borderColor: template.colors?.border || '#e5e7eb',
+                                  fontSize: template.fonts?.size || { heading: 20, body: 12, small: 10 },
+                                  fontFamily: template.fonts || { heading: 'Inter', body: 'Inter' },
+                                  logoUrl: template.logo?.url || '',
+                                  logoPosition: template.logo?.position || 'left',
+                                  logoX: template.logo?.x || 50,
+                                  logoY: template.logo?.y || 50,
+                                  logoWidth: template.logo?.size?.width || 150,
+                                  logoHeight: template.logo?.size?.height || 60,
+                                  logoOpacity: template.logo?.opacity || 100,
+                                  showLogo: template.logo?.showInHeader || false,
+                                  qrCode: template.qrCode || { enabled: false, position: 'payment-right', size: 120 },
+                                  warningBox: template.warningBox || { enabled: false, backgroundColor: '#fef3c7', textColor: '#92400e', icon: '⚠️' },
+                                  socialMedia: template.socialMedia || { enabled: false },
+                                  pageSize: template.pageSize || 'A4',
+                                  orientation: template.orientation || 'portrait',
+                                  decorativeWaves: template.decorativeWaves || { enabled: false, position: 'top', opacity: 20, color: '#3b82f6' },
+                                  imageFrames: template.imageFrames || { borderStyle: 'none', borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 8, shadow: 'none' },
+                                }}
+                              />
+                            </div>
+                          </div>
+                          {activeInvoiceTemplateId === template.id && (
+                            <span className="absolute top-2 right-2 px-2 py-1 bg-sky-500 text-white text-xs rounded font-semibold shadow-lg">
+                              Aktywny
+                            </span>
+                          )}
+                        </div>
+
+                        {/* INFORMACJE */}
+                        <div className="p-4 space-y-3">
+                          <div>
+                            <h4 className="font-bold text-gray-900 text-lg">{template.name}</h4>
+                            <p className="text-xs text-gray-600 mt-1">{template.description || 'Własny szablon'}</p>
+                          </div>
+
+                          {/* Mini badges */}
+                          <div className="flex flex-wrap gap-1">
+                            <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded font-semibold">
+                              Własny
+                            </span>
+                            {template.blocks?.length > 0 && (
+                              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
+                                {template.blocks.length} bloków
+                              </span>
+                            )}
+                            {template.qrCode?.enabled && (
+                              <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">QR</span>
+                            )}
+                            {template.decorativeWaves?.enabled && (
+                              <span className="px-2 py-1 bg-cyan-100 text-cyan-700 text-xs rounded">Fale</span>
+                            )}
+                          </div>
+
+                          {/* Przyciski akcji */}
+                          <div className="flex gap-2 pt-2 border-t border-sky-200">
+                            <button 
+                              onClick={() => {
+                                setActiveInvoiceTemplateId(template.id);
+                                setSelectedTemplateId(template.id);
+                                toast.success(`Szablon "${template.name}" ustawiony jako domyślny`);
+                              }}
+                              className={cn(
+                                "flex-1 px-3 py-2 rounded transition font-semibold text-sm",
+                                activeInvoiceTemplateId === template.id
+                                  ? "bg-gray-300 text-gray-500 cursor-default"
+                                  : "bg-sky-500 hover:bg-sky-600 text-white"
+                              )}
+                              disabled={activeInvoiceTemplateId === template.id}
+                            >
+                              {activeInvoiceTemplateId === template.id ? 'W użyciu' : 'Użyj'}
+                            </button>
+                            <button 
+                              onClick={() => {
+                                setEditingInvoiceTemplate(template);
+                                setShowInvoiceEditor(true);
+                              }}
+                              className="px-3 py-2 bg-white border-2 border-sky-400 text-sky-700 rounded hover:bg-sky-50 transition font-semibold text-sm flex items-center gap-1"
+                              title="Edytuj szablon"
+                            >
+                              <PencilSimple size={16} weight="bold" />
+                              Edytuj
+                            </button>
+                            <button 
+                              onClick={() => deleteCustomTemplate(template.id)}
+                              className="px-3 py-2 bg-white border-2 border-red-400 text-red-700 rounded hover:bg-red-50 transition font-semibold text-sm"
+                              title="Usuń szablon"
+                            >
+                              <Trash size={16} weight="bold" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* DOLNA RAMKA - Galeria domyślnych szablonów */}
             <Card>
               <CardHeader>
-                <CardTitle>Dostępne szablony faktur ({defaultTemplates.length})</CardTitle>
+                <CardTitle>Domyślne szablony faktur ({defaultTemplates.length})</CardTitle>
                 <CardDescription>
-                  Wybierz szablon który będzie używany do generowania faktur PDF. Kliknij "Użyj" aby ustawić jako domyślny.
+                  Predefiniowane szablony - możesz je użyć jako punkt startowy lub edytować.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -621,15 +831,6 @@ export default function Settings() {
                           >
                             {activeInvoiceTemplateId === template.id ? 'W użyciu' : 'Użyj'}
                           </button>
-                          <button 
-                            onClick={() => {
-                              toast.info('Edytor wizualny wkrótce!');
-                            }}
-                            className="px-4 py-2 bg-white border-2 border-sky-400 text-sky-700 rounded hover:bg-sky-50 transition font-semibold text-sm"
-                            title="Edytuj szablon"
-                          >
-                            Edytuj
-                          </button>
                         </div>
                       </div>
                     </div>
@@ -648,6 +849,9 @@ export default function Settings() {
               <TimesheetTemplateEditor
                 template={editingTemplate || undefined}
                 onSave={(template) => {
+                  // Save to localStorage (custom templates)
+                  localStorage.setItem(`timesheet-template-${template.id}`, JSON.stringify(template));
+                  
                   if (editingTemplate) {
                     setTimesheetTemplates(timesheetTemplates.map(t => t.id === template.id ? template : t));
                   } else {

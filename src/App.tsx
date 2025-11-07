@@ -9,6 +9,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AudioProvider } from '@/contexts/AudioContext';
 import { AudioToggle } from '@/components/AudioToggle';
 import { Timesheets } from '@/pages/Timesheets';
+import { TimesheetsNew } from '@/pages/TimesheetsNew';
 import Invoices from './pages/Invoices';
 import InvoiceForm from './pages/InvoiceForm';
 import Clients from './pages/Clients';
@@ -332,7 +333,7 @@ Adres sieciowy: http://192.168.178.75:5002/
       case 'kilometers':
         return <Kilometers />;
       case 'timesheets':
-        return <Timesheets />;
+        return <TimesheetsNew />;
       case 'btw':
         return <BTWAangifte />;
       case 'settings':

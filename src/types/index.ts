@@ -19,6 +19,11 @@ export interface Company {
   default_vat_rate: number;
   currency: string;
   logo_url?: string;
+  // Social Media - company-wide links
+  social_facebook?: string;
+  social_linkedin?: string;
+  social_instagram?: string;
+  social_twitter?: string;
   created_at: string;
   updated_at: string;
 }

@@ -7,6 +7,20 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { 
+  FacebookLogo, 
+  LinkedinLogo, 
+  InstagramLogo, 
+  TwitterLogo,
+  YoutubeLogo,
+  TiktokLogo,
+  WhatsappLogo,
+  TelegramLogo,
+  GithubLogo,
+  EnvelopeSimple,
+  Globe,
+  Phone
+} from '@phosphor-icons/react';
 import { generateQRCode } from '@/lib/qrCodeGenerator';
 
 interface InvoiceBlock {
@@ -15,6 +29,7 @@ interface InvoiceBlock {
   label: string;
   visible: boolean;
   order: number;
+  align?: 'left' | 'center' | 'right';
   backgroundColor?: string;
   textColor?: string;
   fontSize?: number;
@@ -42,40 +57,73 @@ interface EditorState {
   logoHeight: number;
   logoOpacity: number;
   showLogo: boolean;
+  watermarkUrl?: string;
+  watermarkOpacity: number;
+  watermarkSize: number;
+  watermarkRotation: number;
   qrCode: {
     enabled: boolean;
-    position: 'top-right' | 'bottom-right' | 'bottom-left';
+    position: 'payment-right' | 'payment-below' | 'top-right' | 'bottom-right'; // UPDATED: relative to payment
     size: number;
-    data: string;
   };
   warningBox: {
     enabled: boolean;
-    text: string;
     backgroundColor: string;
     textColor: string;
     icon: string;
   };
+  socialMedia: {
+    enabled: boolean;
+    facebook?: string;
+    linkedin?: string;
+    instagram?: string;
+    twitter?: string;
+    youtube?: string;
+    tiktok?: string;
+    whatsapp?: string;
+    telegram?: string;
+    github?: string;
+    email?: string;
+    website?: string;
+    phone?: string;
+  };
   pageSize: 'A4' | 'Letter';
   orientation: 'portrait' | 'landscape';
+  decorativeWaves: {
+    enabled: boolean;
+    position: 'top' | 'bottom' | 'both';
+    opacity: number;
+    color: string;
+  };
+  imageFrames: {
+    borderStyle: 'none' | 'solid' | 'dashed' | 'dotted' | 'double';
+    borderWidth: number;
+    borderColor: string;
+    borderRadius: number;
+    shadow: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  };
 }
 
 interface LiveInvoicePreviewProps {
   state: EditorState;
+  onBlockClick?: (blockId: string) => void; // NEW: Click to highlight callback
 }
 
-const LiveInvoicePreview: React.FC<LiveInvoicePreviewProps> = ({ state }) => {
+const LiveInvoicePreview: React.FC<LiveInvoicePreviewProps> = ({ state, onBlockClick }) => {
   const [qrCodeImage, setQrCodeImage] = useState<string>('');
 
-  // Generate QR code when enabled and data changes
+  // Generate QR code for DEMO purposes (in real invoice, data comes from Invoice.payment_qr_payload)
+  const DEMO_QR_DATA = 'DEMO-PAYMENT-LINK-INV-001';
+  
   useEffect(() => {
-    if (state.qrCode.enabled && state.qrCode.data) {
-      generateQRCode(state.qrCode.data, { size: state.qrCode.size })
+    if (state.qrCode.enabled) {
+      generateQRCode(DEMO_QR_DATA, { size: state.qrCode.size })
         .then(setQrCodeImage)
         .catch(() => setQrCodeImage(''));
     } else {
       setQrCodeImage('');
     }
-  }, [state.qrCode.enabled, state.qrCode.data, state.qrCode.size]);
+  }, [state.qrCode.enabled, state.qrCode.size]);
 
   // A4 dimensions (portrait: 595×842px, landscape: 842×595px)
   const dimensions = state.pageSize === 'A4' 
@@ -154,6 +202,18 @@ const LiveInvoicePreview: React.FC<LiveInvoicePreviewProps> = ({ state }) => {
         );
 
       case 'items-table':
+        // Helper: Get shadow CSS based on shadow setting
+        const getShadowStyle = (shadow: string) => {
+          const shadows = {
+            none: 'none',
+            sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+            md: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+            lg: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+            xl: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+          };
+          return shadows[shadow as keyof typeof shadows] || shadows.none;
+        };
+
         return (
           <div style={{ ...blockStyle, padding: 0 }} className="overflow-hidden">
             <table className="w-full text-sm">
@@ -162,6 +222,7 @@ const LiveInvoicePreview: React.FC<LiveInvoicePreviewProps> = ({ state }) => {
                 color: '#ffffff',
               }}>
                 <tr>
+                  <th className="p-2 text-left">Zdjęcie</th>
                   <th className="p-2 text-left">Pozycja</th>
                   <th className="p-2 text-right">Ilość</th>
                   <th className="p-2 text-right">Cena</th>
@@ -170,12 +231,50 @@ const LiveInvoicePreview: React.FC<LiveInvoicePreviewProps> = ({ state }) => {
               </thead>
               <tbody>
                 <tr className="border-b" style={{ borderColor: state.borderColor }}>
+                  <td className="p-2">
+                    <div
+                      style={{
+                        width: '48px',
+                        height: '48px',
+                        borderStyle: state.imageFrames.borderStyle,
+                        borderWidth: state.imageFrames.borderStyle !== 'none' ? `${state.imageFrames.borderWidth}px` : '0',
+                        borderColor: state.imageFrames.borderColor,
+                        borderRadius: `${state.imageFrames.borderRadius}px`,
+                        boxShadow: getShadowStyle(state.imageFrames.shadow),
+                        backgroundColor: '#f3f4f6',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <span className="text-xl">🏗️</span>
+                    </div>
+                  </td>
                   <td className="p-2">Roboty budowlane - tydzień 1</td>
                   <td className="p-2 text-right">40 godz.</td>
                   <td className="p-2 text-right">€45,00</td>
                   <td className="p-2 text-right">€1.800,00</td>
                 </tr>
                 <tr className="border-b" style={{ borderColor: state.borderColor }}>
+                  <td className="p-2">
+                    <div
+                      style={{
+                        width: '48px',
+                        height: '48px',
+                        borderStyle: state.imageFrames.borderStyle,
+                        borderWidth: state.imageFrames.borderStyle !== 'none' ? `${state.imageFrames.borderWidth}px` : '0',
+                        borderColor: state.imageFrames.borderColor,
+                        borderRadius: `${state.imageFrames.borderRadius}px`,
+                        boxShadow: getShadowStyle(state.imageFrames.shadow),
+                        backgroundColor: '#f3f4f6',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <span className="text-xl">📦</span>
+                    </div>
+                  </td>
                   <td className="p-2">Materiały budowlane</td>
                   <td className="p-2 text-right">1 szt.</td>
                   <td className="p-2 text-right">€350,00</td>
@@ -220,13 +319,60 @@ const LiveInvoicePreview: React.FC<LiveInvoicePreviewProps> = ({ state }) => {
       case 'payment-info':
         return (
           <div style={blockStyle} className="p-4">
-            <h4 className="font-semibold mb-2" style={{ fontSize: `${state.fontSize.heading - 2}px` }}>
-              Dane do przelewu:
-            </h4>
-            <p className="text-sm">Bank: ING Bank</p>
-            <p className="text-sm">IBAN: NL12 INGB 0001 2345 67</p>
-            <p className="text-sm">BIC: INGBNL2A</p>
-            <p className="text-sm mt-2">Prosimy o przelew w ciągu 14 dni.</p>
+            {/* Payment Details + QR Code - NOWA LOGIKA! */}
+            <div className="flex gap-4 items-start">
+              {/* Payment Info (left/main) */}
+              <div className={state.qrCode.enabled && state.qrCode.position === 'payment-right' ? 'flex-1' : 'w-full'}>
+                <h4 className="font-semibold mb-2" style={{ fontSize: `${state.fontSize.heading - 2}px` }}>
+                  Dane do przelewu:
+                </h4>
+                <p className="text-sm">Bank: ING Bank</p>
+                <p className="text-sm">IBAN: NL12 INGB 0001 2345 67</p>
+                <p className="text-sm">BIC: INGBNL2A</p>
+                <p className="text-sm mt-2">Prosimy o przelew w ciągu 14 dni.</p>
+              </div>
+
+              {/* QR Code - OBOK payment info (right) */}
+              {state.qrCode.enabled && state.qrCode.position === 'payment-right' && qrCodeImage && (
+                <div className="flex-shrink-0">
+                  <img
+                    src={qrCodeImage}
+                    alt="QR Code"
+                    style={{
+                      width: `${state.qrCode.size}px`,
+                      height: `${state.qrCode.size}px`,
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '8px',
+                      backgroundColor: '#ffffff',
+                      padding: '4px',
+                    }}
+                  />
+                  <p className="text-xs text-center text-gray-500 mt-1">Zeskanuj aby zapłacić</p>
+                </div>
+              )}
+            </div>
+
+            {/* QR Code - POD payment info (below) */}
+            {state.qrCode.enabled && state.qrCode.position === 'payment-below' && qrCodeImage && (
+              <div className="mt-4 flex justify-center">
+                <div className="text-center">
+                  <img
+                    src={qrCodeImage}
+                    alt="QR Code"
+                    style={{
+                      width: `${state.qrCode.size}px`,
+                      height: `${state.qrCode.size}px`,
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '8px',
+                      backgroundColor: '#ffffff',
+                      padding: '4px',
+                      display: 'inline-block',
+                    }}
+                  />
+                  <p className="text-xs text-gray-500 mt-2">Zeskanuj kod QR aby zapłacić</p>
+                </div>
+              </div>
+            )}
           </div>
         );
 
@@ -269,9 +415,40 @@ const LiveInvoicePreview: React.FC<LiveInvoicePreviewProps> = ({ state }) => {
           backgroundColor: state.backgroundColor,
           color: state.textColor,
           position: 'relative',
+          overflow: 'hidden',
         }}
-        className="shadow-2xl bg-white overflow-auto"
+        className="shadow-2xl bg-white"
       >
+        {/* Watermark (logo w tle) - ZAWSZE WIDOCZNY */}
+        {state.watermarkUrl && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: `translate(-50%, -50%) rotate(${state.watermarkRotation}deg)`,
+              width: `${state.watermarkSize}px`,
+              height: `${state.watermarkSize}px`,
+              opacity: state.watermarkOpacity / 100,
+              zIndex: 1,
+              pointerEvents: 'none',
+              filter: 'grayscale(100%)',
+            }}
+          >
+            <img
+              src={state.watermarkUrl}
+              alt="Watermark"
+              className="w-full h-full object-contain"
+              style={{ userSelect: 'none' }}
+            />
+          </div>
+        )}
+
+        {/* Content Container - Scrollable */}
+        <div 
+          className="relative overflow-auto w-full h-full"
+          style={{ zIndex: 2 }}
+        >
         {/* Logo */}
         {state.showLogo && state.logoUrl && (
           <div
@@ -298,10 +475,19 @@ const LiveInvoicePreview: React.FC<LiveInvoicePreviewProps> = ({ state }) => {
           </div>
         )}
 
-        {/* Invoice Blocks */}
+        {/* Invoice Blocks - INTERACTIVE: Click to highlight! */}
         <div className="relative z-0">
           {visibleBlocks.map((block) => (
-            <div key={block.id} className="border-b" style={{ borderColor: state.borderColor }}>
+            <div 
+              key={block.id} 
+              className="border-b cursor-pointer hover:bg-sky-50/30 transition-colors" 
+              style={{ 
+                borderColor: state.borderColor,
+                textAlign: block.align || 'left',
+              }}
+              onClick={() => onBlockClick?.(block.id)}
+              title={`Kliknij aby zaznaczyć blok: ${block.label}`}
+            >
               {renderBlockContent(block)}
             </div>
           ))}
@@ -318,21 +504,81 @@ const LiveInvoicePreview: React.FC<LiveInvoicePreviewProps> = ({ state }) => {
             >
               <div className="flex items-start gap-3">
                 <span className="text-2xl">{state.warningBox.icon}</span>
-                <p className="text-sm font-bold flex-1">{state.warningBox.text}</p>
+                <p className="text-sm font-bold flex-1">
+                  ⚠️ REVERSE CHARGE: BTW verlegd naar de afnemer volgens artikel 12b Wet OB
+                  <span className="block text-xs font-normal mt-1 opacity-70">
+                    (W prawdziwej fakturze tekst pochodzi z pola "VAT Note")
+                  </span>
+                </p>
               </div>
             </div>
           )}
         </div>
 
-        {/* QR Code */}
-        {state.qrCode.enabled && qrCodeImage && (
+        {/* Decorative Waves - Top */}
+        {state.decorativeWaves.enabled && (state.decorativeWaves.position === 'top' || state.decorativeWaves.position === 'both') && (
+          <svg
+            viewBox="0 0 1440 320"
+            className="absolute top-0 left-0 w-full pointer-events-none"
+            style={{ 
+              opacity: state.decorativeWaves.opacity / 100,
+              zIndex: 5,
+              height: '80px',
+            }}
+          >
+            <path
+              fill={state.decorativeWaves.color}
+              d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
+            />
+          </svg>
+        )}
+
+        {/* Decorative Waves - Bottom */}
+        {state.decorativeWaves.enabled && (state.decorativeWaves.position === 'bottom' || state.decorativeWaves.position === 'both') && (
+          <svg
+            viewBox="0 0 1440 320"
+            className="absolute bottom-0 left-0 w-full pointer-events-none"
+            style={{ 
+              opacity: state.decorativeWaves.opacity / 100,
+              zIndex: 5,
+              height: '80px',
+            }}
+          >
+            <path
+              fill={state.decorativeWaves.color}
+              d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            />
+          </svg>
+        )}
+
+        {/* Social Media Icons - wyświetlane w jednej linii na dole faktury */}
+        {state.socialMedia.enabled && (
+          <div className="flex justify-center items-center gap-3 py-4 border-t" style={{ borderColor: state.borderColor }}>
+            {state.socialMedia.facebook && <FacebookLogo size={20} weight="fill" className="text-blue-600" />}
+            {state.socialMedia.linkedin && <LinkedinLogo size={20} weight="fill" className="text-blue-700" />}
+            {state.socialMedia.instagram && <InstagramLogo size={20} weight="fill" className="text-pink-600" />}
+            {state.socialMedia.twitter && <TwitterLogo size={20} weight="fill" className="text-sky-500" />}
+            {state.socialMedia.youtube && <YoutubeLogo size={20} weight="fill" className="text-red-600" />}
+            {state.socialMedia.tiktok && <TiktokLogo size={20} weight="fill" className="text-gray-900" />}
+            {state.socialMedia.whatsapp && <WhatsappLogo size={20} weight="fill" className="text-green-600" />}
+            {state.socialMedia.telegram && <TelegramLogo size={20} weight="fill" className="text-blue-500" />}
+            {state.socialMedia.github && <GithubLogo size={20} weight="fill" className="text-gray-900" />}
+            {state.socialMedia.email && <EnvelopeSimple size={20} weight="fill" className="text-gray-700" />}
+            {state.socialMedia.phone && <Phone size={20} weight="fill" className="text-gray-700" />}
+            {state.socialMedia.website && <Globe size={20} weight="fill" className="text-gray-700" />}
+          </div>
+        )}
+
+        {/* QR Code - FLOATING (tylko dla top-right/bottom-right) */}
+        {state.qrCode.enabled && 
+         qrCodeImage && 
+         (state.qrCode.position === 'top-right' || state.qrCode.position === 'bottom-right') && (
           <div
             style={{
               position: 'absolute',
-              top: state.qrCode.position.startsWith('top') ? '20px' : 'auto',
-              bottom: state.qrCode.position.startsWith('bottom') ? '20px' : 'auto',
-              left: state.qrCode.position.endsWith('left') ? '20px' : 'auto',
-              right: state.qrCode.position.endsWith('right') ? '20px' : 'auto',
+              top: state.qrCode.position === 'top-right' ? '20px' : 'auto',
+              bottom: state.qrCode.position === 'bottom-right' ? '20px' : 'auto',
+              right: '20px',
               zIndex: 15,
             }}
           >
@@ -350,6 +596,7 @@ const LiveInvoicePreview: React.FC<LiveInvoicePreviewProps> = ({ state }) => {
             />
           </div>
         )}
+        </div> {/* Close Content Container */}
       </div>
     </div>
   );

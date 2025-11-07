@@ -38,18 +38,16 @@ export function useUndoRedo<T>({ maxHistory = 20, initialState }: UseUndoRedoOpt
       ];
 
       // Ogranicz do maxHistory
-      if (newHistory.length > maxHistory) {
-        return newHistory.slice(newHistory.length - maxHistory);
-      }
+      const finalHistory = newHistory.length > maxHistory 
+        ? newHistory.slice(newHistory.length - maxHistory)
+        : newHistory;
 
-      return newHistory;
-    });
+      // POPRAWKA: Aktualizuj currentIndex BEZPOŚREDNIO po dodaniu
+      setCurrentIndex(finalHistory.length - 1);
 
-    setCurrentIndex(prev => {
-      const newIndex = Math.min(prev + 1, history.length);
-      return newIndex;
+      return finalHistory;
     });
-  }, [currentIndex, maxHistory, history.length]);
+  }, [currentIndex, maxHistory]);
 
   // Cofnij (Undo)
   const undo = useCallback(() => {

@@ -11,7 +11,7 @@
  * - Zapisywanie szablonów (budowy + pracownicy)
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAudio } from '@/contexts/AudioContext';
 import { 
   Printer, 
@@ -25,6 +25,8 @@ import {
   Clock,
   CurrencyEur
 } from '@phosphor-icons/react';
+import type { WeekbriefTemplate } from '@/types/weekbrief';
+import { DynamicTimesheetPreview } from '@/components/TimeTracking/DynamicTimesheetPreview';
 
 // ============================================
 // TYPY
@@ -123,6 +125,15 @@ function formatDatePL(dateStr: string): string {
   return date.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
+// Get ISO week number
+function getCurrentWeekNumber(date: Date): number {
+  const tempDate = new Date(date.valueOf());
+  tempDate.setHours(0, 0, 0, 0);
+  tempDate.setDate(tempDate.getDate() + 3 - (tempDate.getDay() + 6) % 7);
+  const week1 = new Date(tempDate.getFullYear(), 0, 4);
+  return 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+}
+
 // ============================================
 // KOMPONENT GŁÓWNY
 // ============================================
@@ -132,8 +143,40 @@ export function Timesheets() {
   const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
   const [currentSheet, setCurrentSheet] = useState<Timesheet | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [activeTemplate, setActiveTemplate] = useState<WeekbriefTemplate | null>(null);
+  const [companyLogo, setCompanyLogo] = useState<string>('');
   
   const printRef = useRef<HTMLDivElement>(null);
+  
+  // Load company logo from localStorage
+  useEffect(() => {
+    try {
+      const companyData = localStorage.getItem('company');
+      if (companyData) {
+        const company = JSON.parse(companyData);
+        if (company.logo_url) {
+          setCompanyLogo(company.logo_url);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load company logo', e);
+    }
+  }, []);
+  
+  // Load active template from localStorage
+  useEffect(() => {
+    const activeTemplateId = localStorage.getItem('activeTimesheetTemplate') || 'pezet-weekbrief-template';
+    
+    // Try to load custom template first
+    const customTemplate = localStorage.getItem(`timesheet-template-${activeTemplateId}`);
+    if (customTemplate) {
+      try {
+        setActiveTemplate(JSON.parse(customTemplate));
+      } catch (e) {
+        console.error('Failed to parse active template', e);
+      }
+    }
+  }, []);
   
   const handlePrint = () => {
     if (printRef.current) {
@@ -607,7 +650,25 @@ export function Timesheets() {
             
             {/* Wersja do wydruku */}
             <div ref={printRef} className="p-8 bg-white">
-              <PrintableTimesheet timesheet={currentSheet} />
+              {activeTemplate ? (
+                <DynamicTimesheetPreview
+                  template={activeTemplate}
+                  employeeName={currentSheet.employeeName}
+                  weekNumber={`${getCurrentWeekNumber(new Date(currentSheet.weekStartDate))}`}
+                  dateFrom={formatDatePL(currentSheet.weekStartDate)}
+                  dateTo={formatDatePL(currentSheet.weekEndDate)}
+                  entries={currentSheet.days.map((day, index) => ({
+                    rowNumber: index + 1,
+                    dayName: day.dayName,
+                    date: formatDatePL(day.date),
+                    hours: day.workedHours.toFixed(1),
+                    notes: day.notes
+                  }))}
+                  logoUrl={companyLogo}
+                />
+              ) : (
+                <PrintableTimesheet timesheet={currentSheet} />
+              )}
             </div>
           </div>
         </div>

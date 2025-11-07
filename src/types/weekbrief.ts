@@ -69,6 +69,11 @@ export interface WeekbriefTemplate {
     borderColor?: string;
     fontSize?: number;
     fontFamily?: string;
+    // NEW: Watermark logo (background)
+    watermarkUrl?: string;
+    watermarkOpacity?: number;
+    watermarkSize?: number;
+    watermarkRotation?: number;
   };
   createdAt: Date;
   updatedAt: Date;

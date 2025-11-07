@@ -19,7 +19,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Trash, Copy, DotsSixVertical, DownloadSimple, UploadSimple } from '@phosphor-icons/react';
+import { Plus, Trash, Copy, DotsSixVertical, DownloadSimple, UploadSimple, Upload } from '@phosphor-icons/react';
 import type { WeekbriefTemplate, WeekbriefColumn } from '@/types/weekbrief';
 import { useUndoRedo, useUndoRedoKeyboard } from '@/hooks/useUndoRedo';
 import { ColorPickerDual, FontControls, LogoControls, UndoRedoToolbar, ColorThemeSelector } from '@/components/shared/TemplateEditor';
@@ -53,6 +53,13 @@ interface EditorState {
   borderColor: string;
   fontSize: number;
   showLogo: boolean;
+  logoUrl: string;  // Logo URL (header logo)
+  // NEW: Watermark logo (background logo in table)
+  showWatermark: boolean;
+  watermarkUrl: string;
+  watermarkOpacity: number; // 0-100%
+  watermarkSize: number; // 100-500px
+  watermarkRotation: number; // -45 to 45 degrees
   rows: number;
 }
 
@@ -223,6 +230,13 @@ export const TimesheetTemplateEditor: React.FC<TimesheetTemplateEditorProps> = (
     borderColor: template?.styles?.borderColor || '#e5e7eb',
     fontSize: template?.styles?.fontSize || 10,
     showLogo: template?.config.showLogo ?? true,
+    logoUrl: '', // Header logo URL
+    // NEW: Watermark logo defaults
+    showWatermark: false,
+    watermarkUrl: '',
+    watermarkOpacity: 10, // 10% opacity (subtle)
+    watermarkSize: 300, // 300px
+    watermarkRotation: -30, // -30 degrees diagonal
     rows: template?.config.rows || 15
   };
 
@@ -237,13 +251,30 @@ export const TimesheetTemplateEditor: React.FC<TimesheetTemplateEditorProps> = (
   } = useUndoRedo<EditorState>({ initialState, maxHistory: 20 });
 
   // Destructure current state
-  const { templateName, columns, headerGradientStart, headerGradientEnd, borderColor, fontSize, showLogo, rows } = currentState;
+  const { templateName, columns, headerGradientStart, headerGradientEnd, borderColor, fontSize, showLogo, logoUrl, showWatermark, watermarkUrl, watermarkOpacity, watermarkSize, watermarkRotation, rows } = currentState;
+
+  // NEW: Selected column for editing (3-column layout)
+  const [selectedColumnId, setSelectedColumnId] = useState<string | null>(
+    columns.length > 0 ? columns[0].id : null
+  );
 
   // Drag & Drop state
   const [activeId, setActiveId] = useState<string | null>(null);
 
   // File input ref for import
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Helper: Get column emoji by type
+  const getColumnIcon = (type: 'text' | 'number' | 'date' | 'time' | 'select') => {
+    const icons: Record<string, string> = {
+      text: '📝',
+      number: '🔢',
+      date: '📅',
+      time: '⏰',
+      select: '📋',
+    };
+    return icons[type] || '📋';
+  };
 
   // Sensors for drag & drop
   const sensors = useSensors(
@@ -378,7 +409,12 @@ export const TimesheetTemplateEditor: React.FC<TimesheetTemplateEditorProps> = (
         headerColor: `linear-gradient(to right, ${headerGradientStart}, ${headerGradientEnd})`,
         borderColor: borderColor,
         fontSize: fontSize,
-        fontFamily: 'Arial, sans-serif'
+        fontFamily: 'Arial, sans-serif',
+        // NEW: Watermark settings
+        watermarkUrl: watermarkUrl || undefined,
+        watermarkOpacity: showWatermark ? watermarkOpacity : undefined,
+        watermarkSize: showWatermark ? watermarkSize : undefined,
+        watermarkRotation: showWatermark ? watermarkRotation : undefined,
       },
       createdAt: template?.createdAt || new Date(),
       updatedAt: new Date()
@@ -425,7 +461,13 @@ export const TimesheetTemplateEditor: React.FC<TimesheetTemplateEditorProps> = (
           borderColor: importedTemplate.styles?.borderColor || '#e5e7eb',
           fontSize: importedTemplate.styles?.fontSize || 10,
           showLogo: importedTemplate.config.showLogo,
-          rows: importedTemplate.config.rows
+          rows: importedTemplate.config.rows,
+          // NEW: Watermark settings
+          showWatermark: !!importedTemplate.styles?.watermarkUrl,
+          watermarkUrl: importedTemplate.styles?.watermarkUrl || '',
+          watermarkOpacity: importedTemplate.styles?.watermarkOpacity || 10,
+          watermarkSize: importedTemplate.styles?.watermarkSize || 300,
+          watermarkRotation: importedTemplate.styles?.watermarkRotation || -30,
         }, 'Zaimportowano szablon');
 
         toast.success(`Szablon "${importedTemplate.name}" zaimportowany!`);
@@ -525,7 +567,12 @@ export const TimesheetTemplateEditor: React.FC<TimesheetTemplateEditorProps> = (
         headerColor: `linear-gradient(to right, ${headerGradientStart}, ${headerGradientEnd})`,
         borderColor: borderColor,
         fontSize: fontSize,
-        fontFamily: 'Arial, sans-serif'
+        fontFamily: 'Arial, sans-serif',
+        // NEW: Watermark settings
+        watermarkUrl: watermarkUrl || undefined,
+        watermarkOpacity: showWatermark ? watermarkOpacity : undefined,
+        watermarkSize: showWatermark ? watermarkSize : undefined,
+        watermarkRotation: showWatermark ? watermarkRotation : undefined,
       },
       createdAt: template?.createdAt || new Date(),
       updatedAt: new Date()
@@ -535,7 +582,7 @@ export const TimesheetTemplateEditor: React.FC<TimesheetTemplateEditorProps> = (
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-blue-100 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-sky-300">
           <div className="flex items-center justify-between">
@@ -602,10 +649,13 @@ export const TimesheetTemplateEditor: React.FC<TimesheetTemplateEditorProps> = (
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* LEFT PANEL - Narzędzia */}
-          <div className="lg:col-span-1 space-y-4">
-            {/* Color Theme Selector - NEW! */}
+        {/* 3-COLUMN LAYOUT */}
+        <div className="grid grid-cols-[480px_1fr_360px] gap-6">
+          {/* ============================================ */}
+          {/* LEFT PANEL - Columns List (480px)           */}
+          {/* ============================================ */}
+          <div className="space-y-4">
+            {/* Color Theme Selector */}
             <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-sky-300">
               <ColorThemeSelector
                 currentGradientStart={headerGradientStart}
@@ -621,70 +671,7 @@ export const TimesheetTemplateEditor: React.FC<TimesheetTemplateEditorProps> = (
               />
             </div>
 
-            {/* Kolory - Gradient Picker */}
-            <ColorPickerDual
-              startColor={headerGradientStart}
-              endColor={headerGradientEnd}
-              onStartColorChange={(color) => updateState({ headerGradientStart: color }, 'Zmieniono kolor start')}
-              onEndColorChange={(color) => updateState({ headerGradientEnd: color }, 'Zmieniono kolor end')}
-              label="Kolory nagłówka (dostosuj)"
-            />
-
-            {/* Border Color Picker */}
-            <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-sky-300">
-              <h3 className="font-bold text-lg mb-4">Kolor ramek</h3>
-              <div className="flex gap-3">
-                <input
-                  type="color"
-                  value={borderColor}
-                  onChange={(e) => updateState({ borderColor: e.target.value }, 'Zmieniono kolor ramek')}
-                  className="w-16 h-12 rounded-lg border-2 border-gray-300 cursor-pointer"
-                  title="Wybierz kolor ramek"
-                />
-                <input
-                  type="text"
-                  value={borderColor}
-                  onChange={(e) => updateState({ borderColor: e.target.value }, 'Zmieniono kolor ramek')}
-                  className="flex-1 px-3 py-2 border-2 border-sky-300 rounded-lg font-mono text-sm"
-                  placeholder="#e5e7eb"
-                />
-              </div>
-            </div>
-
-            {/* Font Controls */}
-            <FontControls
-              fontSize={fontSize}
-              onFontSizeChange={(size) => updateState({ fontSize: size }, 'Zmieniono rozmiar czcionki')}
-            />
-
-            {/* Logo Controls */}
-            <LogoControls
-              showLogo={showLogo}
-              onShowLogoChange={(show) => updateState({ showLogo: show }, 'Zmieniono widoczność logo')}
-            />
-
-            {/* Ustawienia */}
-            <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-sky-300">
-              <h3 className="font-bold text-lg mb-4">Ustawienia</h3>
-              
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Liczba wierszy</label>
-                <input
-                  type="number"
-                  min="5"
-                  max="30"
-                  value={rows}
-                  onChange={(e) => updateState({ rows: Number(e.target.value) }, 'Zmieniono liczbę wierszy')}
-                  className="w-full px-3 py-2 border-2 border-sky-300 rounded-lg font-bold text-center"
-                  title="Liczba wierszy w tabeli czasu pracy (5-30)"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT PANEL - Edytor kolumn + Podgląd */}
-          <div className="lg:col-span-2 space-y-4">
-            {/* Kolumny */}
+            {/* Columns List with Drag & Drop */}
             <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-sky-300">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-lg">Kolumny ({columns.length})</h3>
@@ -693,7 +680,7 @@ export const TimesheetTemplateEditor: React.FC<TimesheetTemplateEditorProps> = (
                   className="px-4 py-2 bg-linear-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white rounded-lg font-bold shadow-lg transition-all flex items-center gap-2"
                 >
                   <Plus size={18} weight="bold" />
-                  Dodaj kolumnę
+                  Dodaj
                 </button>
               </div>
 
@@ -707,20 +694,39 @@ export const TimesheetTemplateEditor: React.FC<TimesheetTemplateEditorProps> = (
                   items={columns.map(col => col.id)}
                   strategy={horizontalListSortingStrategy}
                 >
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {columns.map((column, index) => (
-                      <SortableColumnItem
-                        key={column.id}
-                        column={column}
-                        index={index}
-                        totalColumns={columns.length}
-                        onUpdate={(field, value) => updateColumn(index, field, value)}
-                        onMoveLeft={() => moveColumn(index, 'left')}
-                        onMoveRight={() => moveColumn(index, 'right')}
-                        onDuplicate={() => duplicateColumn(index)}
-                        onRemove={() => removeColumn(index)}
-                      />
-                    ))}
+                  <div className="space-y-2 max-h-[600px] overflow-y-auto">
+                    {columns.map((column, index) => {
+                      const isSelected = selectedColumnId === column.id;
+                      return (
+                        <div
+                          key={column.id}
+                          onClick={() => setSelectedColumnId(column.id)}
+                          className={`cursor-pointer transition-all rounded-xl p-4 border-2 ${
+                            isSelected 
+                              ? 'bg-sky-50 border-sky-500 shadow-lg' 
+                              : 'bg-gray-50 border-gray-200 hover:border-sky-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="text-2xl">{getColumnIcon(column.type)}</div>
+                            <div className="flex-1">
+                              <div className="font-bold text-gray-900">{column.label}</div>
+                              <div className="text-xs text-gray-600">{column.type} · {column.width}</div>
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeColumn(index);
+                              }}
+                              className="p-2 hover:bg-red-100 rounded-lg transition-all"
+                              title="Usuń kolumnę"
+                            >
+                              <Trash size={16} className="text-red-600" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </SortableContext>
 
@@ -738,49 +744,404 @@ export const TimesheetTemplateEditor: React.FC<TimesheetTemplateEditorProps> = (
                 </DragOverlay>
               </DndContext>
             </div>
+          </div>
 
-            {/* Podgląd na żywo */}
-            <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-sky-300">
-              <h3 className="font-bold text-lg mb-4">Podgląd</h3>
+          {/* ============================================ */}
+          {/* CENTER PANEL - Sticky Preview (auto)        */}
+          {/* ============================================ */}
+          <div className="space-y-4">
+            <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-sky-300 sticky top-6">
+              <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                <span>📊</span>
+                Podgląd na żywo
+              </h3>
               
               <div className="bg-gray-100 p-4 rounded-xl overflow-x-auto">
-                <div className="min-w-[800px] bg-white border-2 rounded-lg overflow-hidden" style={{ borderColor: borderColor }}>
+                <div 
+                  className="min-w-[600px] bg-white border-2 rounded-lg overflow-hidden relative" 
+                  style={{ borderColor: borderColor }}
+                >
+                  {/* WATERMARK - Background logo */}
+                  {showWatermark && watermarkUrl && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+                      <img
+                        src={watermarkUrl}
+                        alt="Watermark"
+                        className="select-none"
+                        style={{
+                          width: `${watermarkSize}px`,
+                          opacity: watermarkOpacity / 100,
+                          transform: `rotate(${watermarkRotation}deg)`,
+                          filter: 'grayscale(100%)',
+                          userSelect: 'none',
+                        }}
+                      />
+                    </div>
+                  )}
+
                   {/* Header */}
                   <div 
-                    className="grid" 
+                    className="grid relative z-10" 
                     style={{ 
                       gridTemplateColumns: columns.map(c => c.width).join(' '), 
                       background: `linear-gradient(to right, ${headerGradientStart}, ${headerGradientEnd})` 
                     }}
                   >
-                    {columns.map((col) => (
-                      <div
-                        key={col.id}
-                        className="p-2 font-bold text-center border-r text-white"
-                        style={{ borderColor: borderColor, fontSize: `${fontSize}px` }}
-                      >
-                        {col.label}
-                      </div>
-                    ))}
+                    {columns.map((col) => {
+                      const isSelected = selectedColumnId === col.id;
+                      return (
+                        <div
+                          key={col.id}
+                          onClick={() => setSelectedColumnId(col.id)}
+                          className={`p-2 font-bold text-center border-r text-white cursor-pointer transition-all ${
+                            isSelected ? 'ring-4 ring-yellow-400 ring-inset' : 'hover:opacity-80'
+                          }`}
+                          style={{ borderColor: borderColor, fontSize: `${fontSize}px` }}
+                          title={`Kliknij aby edytować: ${col.label}`}
+                        >
+                          {col.label}
+                        </div>
+                      );
+                    })}
                   </div>
                   
                   {/* Sample Rows */}
                   {Array.from({ length: Math.min(rows, 5) }).map((_, i) => (
                     <div key={i} className="grid" style={{ gridTemplateColumns: columns.map(c => c.width).join(' ') }}>
-                      {columns.map((col) => (
-                        <div
-                          key={col.id}
-                          className="p-2 border-r border-b text-center"
-                          style={{ borderColor: borderColor, fontSize: `${fontSize}px` }}
-                        >
-                          {col.type === 'number' ? '8' : col.type === 'date' ? '01-01-2025' : 'Przykład'}
-                        </div>
-                      ))}
+                      {columns.map((col) => {
+                        const isSelected = selectedColumnId === col.id;
+                        return (
+                          <div
+                            key={col.id}
+                            onClick={() => setSelectedColumnId(col.id)}
+                            className={`p-2 border-r border-b text-center cursor-pointer transition-all ${
+                              isSelected ? 'bg-sky-50 ring-2 ring-sky-300 ring-inset' : 'hover:bg-gray-50'
+                            }`}
+                            style={{ borderColor: borderColor, fontSize: `${fontSize}px` }}
+                          >
+                            {col.type === 'number' ? '8' : col.type === 'date' ? '01-01-2025' : 'Przykład'}
+                          </div>
+                        );
+                      })}
                     </div>
                   ))}
                 </div>
+                
+                {/* Preview Info */}
+                <div className="mt-3 text-xs text-gray-600 text-center">
+                  Pokazano {Math.min(rows, 5)} z {rows} wierszy · Kliknij kolumnę aby edytować
+                </div>
               </div>
             </div>
+          </div>
+
+          {/* ============================================ */}
+          {/* RIGHT PANEL - Column Editor (360px)         */}
+          {/* ============================================ */}
+          <div className="space-y-4">
+            {selectedColumnId && columns.find(c => c.id === selectedColumnId) ? (
+              <>
+                {/* Selected Column Editor */}
+                <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-sky-300">
+                  <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                    <span>{getColumnIcon(columns.find(c => c.id === selectedColumnId)!.type)}</span>
+                    Edycja kolumny
+                  </h3>
+
+                  {(() => {
+                    const selectedColumn = columns.find(c => c.id === selectedColumnId)!;
+                    const selectedIndex = columns.findIndex(c => c.id === selectedColumnId);
+
+                    return (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">Nazwa kolumny</label>
+                          <input
+                            type="text"
+                            value={selectedColumn.label}
+                            onChange={(e) => updateColumn(selectedIndex, 'label', e.target.value)}
+                            className="w-full px-3 py-2 border-2 border-sky-300 rounded-lg font-semibold focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
+                            placeholder="np. Dag, Datum, Uren"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">Typ danych</label>
+                          <select
+                            value={selectedColumn.type}
+                            onChange={(e) => updateColumn(selectedIndex, 'type', e.target.value)}
+                            className="w-full px-3 py-2 border-2 border-sky-300 rounded-lg font-semibold focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
+                            title="Wybierz typ danych dla kolumny"
+                          >
+                            <option value="text">📝 Tekst</option>
+                            <option value="number">🔢 Liczba</option>
+                            <option value="date">📅 Data</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">Szerokość</label>
+                          <input
+                            type="text"
+                            value={selectedColumn.width}
+                            onChange={(e) => updateColumn(selectedIndex, 'width', e.target.value)}
+                            className="w-full px-3 py-2 border-2 border-sky-300 rounded-lg font-mono focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
+                            placeholder="np. 10%, 60px"
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-2 p-3 bg-sky-50 rounded-lg">
+                          <input
+                            type="checkbox"
+                            checked={selectedColumn.required || false}
+                            onChange={(e) => updateColumn(selectedIndex, 'required', e.target.checked)}
+                            className="w-5 h-5 rounded border-gray-300 text-sky-600 focus:ring-2 focus:ring-sky-200"
+                            id="column-required"
+                          />
+                          <label htmlFor="column-required" className="font-semibold text-gray-700 cursor-pointer">
+                            Pole wymagane
+                          </label>
+                        </div>
+
+                        <div className="flex gap-2 pt-4 border-t border-gray-200">
+                          <button
+                            onClick={() => duplicateColumn(selectedIndex)}
+                            className="flex-1 px-4 py-2 bg-sky-100 hover:bg-sky-200 text-sky-700 rounded-lg font-bold transition-all flex items-center justify-center gap-2"
+                          >
+                            <Copy size={16} weight="bold" />
+                            Duplikuj
+                          </button>
+                          <button
+                            onClick={() => {
+                              removeColumn(selectedIndex);
+                              setSelectedColumnId(columns[0]?.id || null);
+                            }}
+                            className="flex-1 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-bold transition-all flex items-center justify-center gap-2"
+                          >
+                            <Trash size={16} weight="bold" />
+                            Usuń
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Global Settings */}
+                <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-sky-300">
+                  <h3 className="font-bold text-lg mb-4">⚙️ Globalne ustawienia</h3>
+
+                  <div className="space-y-4">
+                    {/* Gradient Colors */}
+                    <ColorPickerDual
+                      startColor={headerGradientStart}
+                      endColor={headerGradientEnd}
+                      onStartColorChange={(color) => updateState({ headerGradientStart: color }, 'Zmieniono kolor start')}
+                      onEndColorChange={(color) => updateState({ headerGradientEnd: color }, 'Zmieniono kolor end')}
+                      label="Kolory nagłówka"
+                    />
+
+                    {/* Border Color */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Kolor ramek</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="color"
+                          value={borderColor}
+                          onChange={(e) => updateState({ borderColor: e.target.value }, 'Zmieniono kolor ramek')}
+                          className="w-12 h-10 rounded-lg border-2 border-gray-300 cursor-pointer"
+                          title="Wybierz kolor ramek"
+                          aria-label="Picker koloru ramek"
+                        />
+                        <input
+                          type="text"
+                          value={borderColor}
+                          onChange={(e) => updateState({ borderColor: e.target.value }, 'Zmieniono kolor ramek')}
+                          className="flex-1 px-3 py-2 border-2 border-sky-300 rounded-lg font-mono text-sm"
+                          placeholder="#e5e7eb"
+                          title="Hex kodu koloru ramek"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Font Size */}
+                    <FontControls
+                      fontSize={fontSize}
+                      onFontSizeChange={(size) => updateState({ fontSize: size }, 'Zmieniono rozmiar czcionki')}
+                    />
+
+                    {/* Logo */}
+                    <LogoControls
+                      showLogo={showLogo}
+                      onShowLogoChange={(show) => updateState({ showLogo: show }, 'Zmieniono widoczność logo')}
+                      logoUrl={logoUrl}
+                      onLogoUpload={(url) => updateState({ logoUrl: url }, 'Dodano logo')}
+                      showLivePreview={false}
+                    />
+
+                    {/* Watermark Logo (background) */}
+                    <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-sky-300">
+                      <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span>🖼️</span>
+                        Logo w tle (watermark)
+                      </h3>
+
+                      <div className="space-y-4">
+                        {/* Show/Hide Watermark */}
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={showWatermark}
+                            onChange={(e) => updateState({ showWatermark: e.target.checked }, 'Zmieniono widoczność watermark')}
+                            className="w-5 h-5 rounded border-2 border-sky-300 text-sky-600 focus:ring-2 focus:ring-sky-200"
+                          />
+                          <span className="font-semibold">Pokaż logo w tle</span>
+                        </label>
+
+                        {/* Upload Watermark */}
+                        <div>
+                          <input
+                            type="file"
+                            id="watermark-upload"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  updateState({ watermarkUrl: reader.result as string }, 'Dodano watermark');
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                            className="hidden"
+                          />
+                          <label
+                            htmlFor="watermark-upload"
+                            className="w-full px-4 py-3 bg-linear-to-r from-purple-100 to-pink-100 hover:from-purple-200 hover:to-pink-200 text-purple-700 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer"
+                          >
+                            <Upload size={20} />
+                            {watermarkUrl ? 'Zmień watermark' : 'Upload logo w tle'}
+                          </label>
+                        </div>
+
+                        {showWatermark && watermarkUrl && (
+                          <>
+                            {/* Opacity Slider */}
+                            <div>
+                              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Przezroczystość: {watermarkOpacity}%
+                              </label>
+                              <input
+                                type="range"
+                                min="5"
+                                max="50"
+                                value={watermarkOpacity}
+                                onChange={(e) => updateState({ watermarkOpacity: Number(e.target.value) }, 'Zmieniono przezroczystość')}
+                                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-sky-600"
+                                title="Przezroczystość watermark (5-50%)"
+                                aria-label="Slider przezroczystości watermark"
+                              />
+                              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>5% (ledwo widoczne)</span>
+                                <span>50% (mocne)</span>
+                              </div>
+                            </div>
+
+                            {/* Size Slider */}
+                            <div>
+                              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Rozmiar: {watermarkSize}px
+                              </label>
+                              <input
+                                type="range"
+                                min="100"
+                                max="600"
+                                step="50"
+                                value={watermarkSize}
+                                onChange={(e) => updateState({ watermarkSize: Number(e.target.value) }, 'Zmieniono rozmiar')}
+                                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-sky-600"
+                                title="Rozmiar watermark (100-600px)"
+                                aria-label="Slider rozmiaru watermark"
+                              />
+                              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>Małe</span>
+                                <span>Duże</span>
+                              </div>
+                            </div>
+
+                            {/* Rotation Slider */}
+                            <div>
+                              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Obrót: {watermarkRotation}°
+                              </label>
+                              <input
+                                type="range"
+                                min="-45"
+                                max="45"
+                                step="5"
+                                value={watermarkRotation}
+                                onChange={(e) => updateState({ watermarkRotation: Number(e.target.value) }, 'Zmieniono obrót')}
+                                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-sky-600"
+                                title="Obrót watermark (-45° do 45°)"
+                                aria-label="Slider obrotu watermark"
+                              />
+                              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>-45° (lewo)</span>
+                                <span>0° (prosto)</span>
+                                <span>45° (prawo)</span>
+                              </div>
+                            </div>
+
+                            {/* Preview */}
+                            <div className="p-4 bg-gray-100 rounded-lg border-2 border-gray-300">
+                              <div className="text-xs font-bold text-gray-600 mb-2 text-center">Podgląd watermark</div>
+                              <div className="relative h-32 bg-white rounded overflow-hidden flex items-center justify-center">
+                                <img
+                                  src={watermarkUrl}
+                                  alt="Watermark preview"
+                                  className="absolute"
+                                  style={{
+                                    width: `${watermarkSize / 3}px`,
+                                    opacity: watermarkOpacity / 100,
+                                    transform: `rotate(${watermarkRotation}deg)`,
+                                    filter: 'grayscale(100%)',
+                                  }}
+                                />
+                                <div className="text-xs text-gray-400 z-10">Tak będzie wyglądać w tle tabeli</div>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Rows */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Liczba wierszy</label>
+                      <input
+                        type="number"
+                        min="5"
+                        max="30"
+                        value={rows}
+                        onChange={(e) => updateState({ rows: Number(e.target.value) }, 'Zmieniono liczbę wierszy')}
+                        className="w-full px-3 py-2 border-2 border-sky-300 rounded-lg font-bold text-center focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
+                        title="Liczba wierszy tabeli (5-30)"
+                        placeholder="15"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-gray-300">
+                <div className="text-center text-gray-500 py-12">
+                  <div className="text-4xl mb-3">👈</div>
+                  <p className="font-semibold">Wybierz kolumnę do edycji</p>
+                  <p className="text-sm mt-2">Kliknij na kolumnę z listy po lewej</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

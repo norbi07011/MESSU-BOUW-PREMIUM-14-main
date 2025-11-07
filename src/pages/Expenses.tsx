@@ -23,6 +23,9 @@ export default function Expenses() {
   const { expenses, loading, createExpense, updateExpense, deleteExpense } = useExpenses();
   const { clients } = useClients();
   
+  // Detekcja mobile dla capture attribute
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  
   const [showDialog, setShowDialog] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
@@ -260,7 +263,9 @@ export default function Expenses() {
       ['Data', 'Kategoria', 'Dostawca', 'Opis', 'Netto', 'VAT', 'Brutto', 'Nr faktury'].join(','),
       ...filteredExpenses.map(exp => [
         exp.date,
-        EXPENSE_CATEGORIES[exp.category]?.name || exp.category,
+        (exp.category in EXPENSE_CATEGORIES) 
+          ? EXPENSE_CATEGORIES[exp.category as ExpenseCategory].name 
+          : exp.category,
         exp.supplier,
         exp.description || '',
         exp.amount_net,
@@ -543,12 +548,12 @@ export default function Expenses() {
                         Galeria / Pliki
                       </Button>
                       
-                      {/* Input dla aparatu (capture="environment" aktywuje tylną kamerę) */}
+                      {/* Input dla aparatu (capture="environment" aktywuje tylną kamerę tylko na mobile) */}
                       <input
                         ref={cameraInputRef}
                         type="file"
                         accept="image/*"
-                        capture="environment"
+                        {...(isMobile ? { capture: 'environment' as any } : {})}
                         multiple
                         onChange={handleFileSelect}
                         className="hidden"
@@ -750,8 +755,12 @@ export default function Expenses() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">
-                            {EXPENSE_CATEGORIES[expense.category]?.icon} {' '}
-                            {EXPENSE_CATEGORIES[expense.category]?.name.replace(/^[^\s]+ /, '')}
+                            {(expense.category in EXPENSE_CATEGORIES) && EXPENSE_CATEGORIES[expense.category as ExpenseCategory].icon}
+                            {' '}
+                            {(expense.category in EXPENSE_CATEGORIES) 
+                              ? EXPENSE_CATEGORIES[expense.category as ExpenseCategory].name.replace(/^[^\s]+ /, '')
+                              : expense.category
+                            }
                           </Badge>
                         </TableCell>
                         <TableCell className="font-medium">{expense.supplier}</TableCell>
